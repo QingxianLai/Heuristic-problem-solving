@@ -20,9 +20,7 @@ public class Problem2 {
 
 
         for (int i = UPPER-1; i>0; i--) {
-            if (i == 30) {
-                int aaa = i;
-            }
+
             int min = 10;
             for (int coin: denominations) {
                 if (i+coin <= UPPER) {
