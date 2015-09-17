@@ -16,8 +16,6 @@ public class Problem2 {
                 }
             }
             dp[i] = min;
-
-            System.out.println(i + ": " + min);
         }
 
 
@@ -33,7 +31,7 @@ public class Problem2 {
             }
 
             dp[i] = Math.min(dp[i], min);
-            System.out.println(i + ": " + dp[i]);
+            System.out.println(i + "=> " + dp[i]);
         }
 
     }
