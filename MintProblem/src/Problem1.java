@@ -1,4 +1,4 @@
-class Problem1 {
+public class Problem1 {
     int[] targetDenominations = new int[7];
     public void go(final int N) {
         Runnable runnable = new Runnable() {
@@ -56,7 +56,7 @@ class Problem1 {
     }
 
     public static void main (String[] args) {
-        Solution solution = new Solution();
+        Problem1 solution = new Problem1();
         /* int N = Integer.parseInt(args[0]); */
         solution.go(1);
         /* int[] res = solution.getScore(new int[]{1, 2, 9, 21, 46, 73, 76}, 1); */
