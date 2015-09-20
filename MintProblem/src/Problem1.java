@@ -1,4 +1,4 @@
-class Problem1 {
+public class Problem1 {
     int[] targetDenominations = new int[7];
     public void go(final int N) {
         Runnable runnable = new Runnable() {
