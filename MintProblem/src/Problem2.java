@@ -90,7 +90,7 @@ public class Problem2 {
          * (1) 1 5 30 45 50 55 170 (652 82) Minimum score2
          * (2) 1 3 10 20 25 85 140 (567 89)
          *     1 4 20 40 50 55 175 (598 88) Minimum score2 when minizing score1
-         * (3) 1 4 16 23 34 82 113 (497 128) Minimum total score(keep searching)
+         * (3) 1 7 50 74 96 106 111 (501 122) Minimum total score(keep searching)
          */ 
     }
 }
