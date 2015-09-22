@@ -54,7 +54,7 @@ public class Problem2 {
         dp[0] = 0;
 
         for (int i = 1; i < UPPER; i++) {
-            int min = 10;
+            int min = 240;
             for (int coin: denominations) {
                 if (i - coin >= 0) {
                     min = Math.min(min, dp[i - coin] + 1);
@@ -71,6 +71,7 @@ public class Problem2 {
                 }
             }
             dp[i] = Math.min(dp[i], min);
+//            System.out.println(i + " : " + dp[i] );
             if (i % 5 == 0) {
                 score += dp[i] * N;
                 score2 += dp[i] * N;
@@ -79,12 +80,15 @@ public class Problem2 {
                 score1 += dp[i];
             }
         }
+
         return new int[]{score, score1, score2};
     }
     public static void main (String[] args) {
-        /* Problem2 solution = new Problem2(); */
+        Problem2 solution = new Problem2();
+        solution.getScore(new int[] {1,5,20,37,40,50,115}, 20);
         /* solution.go(1); */
-        Double N = Double.parseInt(args[0]);
+//        Double N = Double.parseDouble(args[0]);
+
         /**
          * Potential solution:
          * (1) 1 5 30 45 50 55 170 (652 82) Minimum score2

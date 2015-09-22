@@ -58,7 +58,7 @@ public class Problem1 {
     public static void main (String[] args) {
         /* Problem1 solution = new Problem1(); */
         /* solution.go(1); */
-        double N = Double.parseDouble(args[0])
+        double N = Double.parseDouble(args[0]);
         if (N <= 1.974358) {
             System.out.println(1 + " " + 5 + " " + 11 + " " + 24 + " " + 60 + " " + 67 + " " + 88);
         } else if (N <=18.888888) {
