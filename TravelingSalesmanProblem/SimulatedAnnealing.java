@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class SimulatedAnnealing {
     private double temperature = 10000;
     private static final double COOLING_RATE = 0.005;
