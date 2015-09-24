@@ -1,12 +1,18 @@
 public class City {
+    private int id;
     private int x;
     private int y;
     private int z;
 
-    public City(int x, int y, int z) {
+    public City(int id, int x, int y, int z) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     public int getX() {
