@@ -36,7 +36,7 @@ public class SimulatedAnnealing {
         return tour;
     }
     public static void main (String[] args) {
-        GenerateCities f = new GenerateCities("travelingtest.txt");
+        GenerateCities f = new GenerateCities("src/travelingtest.txt");
         SimulatedAnnealing sa = new SimulatedAnnealing(f.getCities());
     }
 }
