@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -29,18 +30,18 @@ public class Tour {
         return distance;
     }
 
-    public double distanceChange(int pos1, int pos2) {
+    public double distanceDiff(int pos1, int pos2) {
         if (pos1 == pos2) {
             return 0.0;
         }
         if (pos1 > pos2) {
-            return distanceChange(pos2, pos1);
+            return distanceDiff(pos2, pos1);
         }
         if (pos1 == 0) {
             if (pos2 == CITY_NUMBER - 1) {
                 return (tour.get(CITY_NUMBER - 1).computeDistance(tour.get(1)) + tour.get(0).computeDistance(tour.get(CITY_NUMBER - 2))) - (tour.get(0).computeDistance(tour.get(1)) + tour.get(CITY_NUMBER - 2).computeDistance(tour.get(CITY_NUMBER - 1)));
             } else {
-                return (tour.get(0).computeDistance(tour.get(pos2 - 1)) + tour.get(0).computeDistance(tour.get(pos + 1)) + tour.get(pos2).computeDistance(tour.get(1))) - (tour.get(0).computeDistance(tour.get(1)) + tour.get(pos2 - 1).computeDistance(tour.get(pos2)) + tour.get(pos2).computeDistance(tour.get(pos2 + 1)));
+                return (tour.get(0).computeDistance(tour.get(pos2 - 1)) + tour.get(0).computeDistance(tour.get(pos2 + 1)) + tour.get(pos2).computeDistance(tour.get(1))) - (tour.get(0).computeDistance(tour.get(1)) + tour.get(pos2 - 1).computeDistance(tour.get(pos2)) + tour.get(pos2).computeDistance(tour.get(pos2 + 1)));
             }
         } else {
             if (pos2 == CITY_NUMBER - 1) {

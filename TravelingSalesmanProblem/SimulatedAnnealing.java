@@ -27,12 +27,16 @@ public class SimulatedAnnealing {
             int pos2 = (int)(CITY_NUMBER * Math.random());
             double diff = tour.distanceDiff(pos1, pos2);
             if (acceptProbability(diff) > Math.random()) {
-                City temp = tour.get(pos1);
-                tour.setCity(pos1, tour.get(pos2));
+                City temp = tour.getCity(pos1);
+                tour.setCity(pos1, tour.getCity(pos2));
                 tour.setCity(pos2, temp);
             }
             temperature -= temperature * COOLING_RATE; 
         }
         return tour;
+    }
+    public static void main (String[] args) {
+        GenerateCities f = new GenerateCities("travelingtest.txt");
+        SimulatedAnnealing sa = new SimulatedAnnealing(f.getCities());
     }
 }
