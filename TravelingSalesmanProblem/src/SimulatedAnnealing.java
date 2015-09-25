@@ -14,13 +14,14 @@ public class SimulatedAnnealing {
         if (distanceDiff < 0) {
             return 1.0;
         } else {
-            return Math.exp(distanceDiff / temperature);
+            return 0; //Math.exp(-distanceDiff / temperature);
         }
     }
     
     public Tour simulatedAnnealing() {
-        Tour tour = new Tour(cities);
-        tour.shuffleTour();
+        GreedySearch m = new GreedySearch(cities);
+        Tour tour = new Tour(m.getPath());
+
         double initialDistance = tour.totalDistance();
         while (temperature > 1.0) {
             int pos1 = (int)(CITY_NUMBER * Math.random());
@@ -33,10 +34,12 @@ public class SimulatedAnnealing {
             }
             temperature -= temperature * COOLING_RATE; 
         }
+        System.out.println(tour.totalDistance());
         return tour;
     }
     public static void main (String[] args) {
         GenerateCities f = new GenerateCities("src/travelingtest.txt");
         SimulatedAnnealing sa = new SimulatedAnnealing(f.getCities());
+        sa.simulatedAnnealing();
     }
 }
