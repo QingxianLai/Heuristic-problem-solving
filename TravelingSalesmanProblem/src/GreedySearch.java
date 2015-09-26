@@ -63,7 +63,7 @@ public class GreedySearch {
             current = nearestCity;
         }
 
-//        System.out.println("total distance: "+ total);
+        System.out.println("total distance: "+ total);
         return total;
     }
 
