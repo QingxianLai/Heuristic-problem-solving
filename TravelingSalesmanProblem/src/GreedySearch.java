@@ -40,6 +40,8 @@ public class GreedySearch {
 
         double total = 0.0;
 
+        int lineCount = 1;
+
         while (true) {
             marked[current.getId()] = true;
 //            System.out.println(current.getId());
@@ -60,7 +62,12 @@ public class GreedySearch {
                 break;
             }
             total += min;
+
+            //print
+            System.out.println(lineCount+" City: " + nearestCity.getId() + "   Distance: "+ min);
+
             current = nearestCity;
+
         }
 
         System.out.println("total distance: "+ total);
