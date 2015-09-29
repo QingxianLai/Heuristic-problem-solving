@@ -16,8 +16,6 @@ public class GreedySearch {
         int minStart = 0;
         for(int i = 0; i< cities.size(); i++) {
             double res = Search(i);
-            //System.out.println(res);
-
             if (min > res) {
                 min = res;
                 minStart = i;
@@ -37,9 +35,10 @@ public class GreedySearch {
 
         double total = 0.0;
 
+        int lineCount = 1;
+
         while (true) {
             marked[current.getId()] = true;
-//            System.out.println(current.getId());
             Path.add(current);
             double min = 1000000.0;
             City nearestCity = null;
@@ -60,6 +59,5 @@ public class GreedySearch {
             current = nearestCity;
         }
         return total;
-//        System.out.println("total distance: "+ total);
     }
 }
