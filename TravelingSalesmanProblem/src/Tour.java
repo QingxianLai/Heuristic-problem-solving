@@ -3,11 +3,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Tour {
-    private static final int CITY_NUMBER = 1000;
+    private static int CITY_NUMBER = 1000;
     public List<City> tour;
     
     public Tour(List<City> tour) {
         this.tour = new ArrayList<City>(tour);
+        CITY_NUMBER = tour.size();
     }
 
     public City getCity(int position) {
@@ -47,6 +48,9 @@ public class Tour {
             if (pos2 == CITY_NUMBER - 1) {
                 return (tour.get(CITY_NUMBER - 2).computeDistance(tour.get(pos1)) + tour.get(pos1 - 1).computeDistance(tour.get(CITY_NUMBER - 1)) + tour.get(CITY_NUMBER - 1).computeDistance(tour.get(pos1 + 1))) - (tour.get(CITY_NUMBER - 2).computeDistance(tour.get(CITY_NUMBER - 1)) + tour.get(pos1 - 1).computeDistance(tour.get(pos1)) + tour.get(pos1).computeDistance(tour.get(pos1 + 1)));
             } else {
+                if (pos2 - pos1 == 1) {
+                    return -(tour.get(pos1 - 1).computeDistance(tour.get(pos1)) + tour.get(pos2).computeDistance(tour.get(pos2 + 1))) + (tour.get(pos1 - 1).computeDistance(tour.get(pos2)) + tour.get(pos1).computeDistance(tour.get(pos2 + 1)));
+                }
                 return (tour.get(pos2 - 1).computeDistance(tour.get(pos1)) + tour.get(pos1).computeDistance(tour.get(pos2 + 1)) + tour.get(pos1 - 1).computeDistance(tour.get(pos2)) + tour.get(pos2).computeDistance(tour.get(pos1 + 1))) - (tour.get(pos2 - 1).computeDistance(tour.get(pos2)) + tour.get(pos2).computeDistance(tour.get(pos2 + 1)) + tour.get(pos1 - 1).computeDistance(tour.get(pos1)) + tour.get(pos1).computeDistance(tour.get(pos1 + 1)));
             }
         }

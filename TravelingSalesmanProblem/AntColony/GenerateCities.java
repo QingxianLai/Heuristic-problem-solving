@@ -20,6 +20,7 @@ public class GenerateCities {
             for(String line; (line = br.readLine()) != null; ) {
                 String[] cur = line.split(" ");
                 City city = new City(Integer.parseInt(cur[0]), Integer.parseInt(cur[1]), Integer.parseInt(cur[2]), Integer.parseInt(cur[3]));
+//                System.out.println("id: " + cur[0] + " x: " + cur[1] + " y: " + cur[2] + " z: " + cur[3]);
                 tour.add(city);
             }
         } catch (IOException e) {

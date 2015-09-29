@@ -12,21 +12,18 @@ public class GreedySearch {
     public GreedySearch(List<City> cities) {
         this.cities = cities;
         marked = new boolean[cities.size()+1];
-//        double min = 10000000.0;
-//        int minStart = 0;
-//        for(int i = 0; i< 100; i++) {
-//            double res = Search(i);
-//            System.out.println(res);
-//
-//            if (min >res) {
-//                min = res;
-//                minStart = i;
-//            }
-//        }
-//
-//        System.out.println("min: " + min);
-//        System.out.println("minStart: " + minStart);
-        Search(0);
+        double min = 10000000.0;
+        int minStart = 0;
+        for(int i = 0; i< cities.size(); i++) {
+            double res = Search(i);
+            //System.out.println(res);
+
+            if (min > res) {
+                min = res;
+                minStart = i;
+            }
+        }
+        Search(minStart);
     }
 
     public List<City> getPath(){
@@ -44,7 +41,7 @@ public class GreedySearch {
             marked[current.getId()] = true;
 //            System.out.println(current.getId());
             Path.add(current);
-            double min = 100000.0;
+            double min = 1000000.0;
             City nearestCity = null;
             for (City c: cities) {
                 if (marked[c.getId()]) {
@@ -62,15 +59,7 @@ public class GreedySearch {
             total += min;
             current = nearestCity;
         }
-
-//        System.out.println("total distance: "+ total);
         return total;
+//        System.out.println("total distance: "+ total);
     }
-
-    public static void main(String[] args) {
-        GenerateCities f = new GenerateCities("src/travelingtest.txt");
-        GreedySearch m = new GreedySearch(f.getCities());
-    }
-
-
 }
