@@ -12,20 +12,20 @@ public class GreedySearch {
     public GreedySearch(List<City> cities) {
         this.cities = cities;
         marked = new boolean[cities.size()+1];
-//        double min = 10000000.0;
-//        int minStart = 0;
-//        for(int i = 0; i< 100; i++) {
-//            double res = Search(i);
-//            System.out.println(res);
-//
-//            if (min >res) {
-//                min = res;
-//                minStart = i;
-//            }
-//        }
-//
-//        System.out.println("min: " + min);
-//        System.out.println("minStart: " + minStart);
+        double min = 10000000.0;
+        int minStart = 0;
+        for(int i = 0; i< 100; i++) {
+            double res = Search(i);
+            System.out.println(res);
+
+            if (min >res) {
+                min = res;
+                minStart = i;
+            }
+        }
+
+        System.out.println("min: " + min);
+        System.out.println("minStart: " + minStart);
         Search(0);
     }
 
@@ -64,13 +64,13 @@ public class GreedySearch {
             total += min;
 
             //print
-            System.out.println(lineCount+" City: " + nearestCity.getId() + "   Distance: "+ min);
+//            System.out.println(lineCount+" City: " + nearestCity.getId() + "   Distance: "+ min);
 
             current = nearestCity;
 
         }
 
-        System.out.println("total distance: "+ total);
+//        System.out.println("total distance: "+ total);
         return total;
     }
 

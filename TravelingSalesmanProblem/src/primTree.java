@@ -14,6 +14,10 @@ public class primTree {
         this.cities = cities;
         Graph primT = new Graph(cities.size()+1);
 
+
+        double treeLength = 0.0;
+
+
         City current = cities.get(1);
         while (true) {
             inTree.add(current);
@@ -44,9 +48,11 @@ public class primTree {
             }
 
             primT.addEdge(nearestFrom.getId(), nearestTo.getId(), nearestFrom.computeDistance(nearestTo));
+            treeLength += nearestFrom.computeDistance(nearestTo);
             current = nearestTo;
         }
 
+        System.out.println("tree Distance: " + treeLength);
         return primT;
     }
 
@@ -54,10 +60,13 @@ public class primTree {
     public List<Integer> findEulerPath(Graph g){
         // make sure that g is a eulerian graph; Using Fleury's Algorithm
 
-        int startCity = 10;
+        int startCity = 100;
         int city = startCity;
         List<Integer> path = new ArrayList<Integer>();
 
+
+        double EulerPathLength = 0.0;
+        int line_Count = 1;
 
         while (true) {
 
@@ -94,11 +103,19 @@ public class primTree {
                 }
             }
 
+            // debug
+            double dis = cities.get(city-1).computeDistance(cities.get(nextCity-1));
+            EulerPathLength += dis;
+            System.out.println(line_Count + ". " + city+" => "+nextCity + " || distance: " + dis);
+            line_Count ++;
+
+
             city = nextCity;
-            if (city == startCity) {
-                break;
-            }
+
         }
+
+        System.out.println("EulerPathLength = " + EulerPathLength);
+        System.out.println("Euler path size = " + path.size());
 
         return path;
     }
@@ -123,17 +140,17 @@ public class primTree {
 
             int last = path.get(lastCity);
             double dis =  cities.get(last - 1).computeDistance(cities.get(current - 1));
+
             total += dis;
 
             // print
-            System.out.println(line_count+ " : "+ current+ "  distance: " + dis);
+            System.out.println(line_count+ " : " + last + " => " + current+ " || distance: " + dis);
             line_count++;
 
             marked[current] = true;
             lastCity = currentCity;
             currentCity++;
         }
-
         return total;
     }
 
@@ -141,7 +158,8 @@ public class primTree {
     public static void main(String[] args) {
         GenerateCities f = new GenerateCities("src/travelingtest.txt");
         primTree m = new primTree();
-        Graph g = m.primEulerGraph(f.getCities());
+        List<City> cities = f.getCities();
+        Graph g = m.primEulerGraph(cities);
         List<Integer> path = m.findEulerPath(g);
         double totalDistance = m.getTotalDistance(path);
         System.out.println(totalDistance);
