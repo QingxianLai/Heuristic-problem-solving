@@ -14,19 +14,19 @@ public class GreedySearch {
         marked = new boolean[cities.size()+1];
         double min = 10000000.0;
         int minStart = 0;
-        for(int i = 0; i< 100; i++) {
-            double res = Search(i);
-            System.out.println(res);
+//        for(int i = 0; i< 1000; i++) {
+//            double res = Search(i);
+////            System.out.println(res);
+//
+//            if (min >res) {
+//                min = res;
+//                minStart = i;
+//            }
+//        }
 
-            if (min >res) {
-                min = res;
-                minStart = i;
-            }
-        }
-
-        System.out.println("min: " + min);
-        System.out.println("minStart: " + minStart);
-        Search(0);
+//        System.out.println("min: " + min);
+//        System.out.println("minStart: " + minStart);
+        Search(968);
     }
 
     public List<City> getPath(){
@@ -44,20 +44,27 @@ public class GreedySearch {
 
         while (true) {
             marked[current.getId()] = true;
+//            System.out.println(Path.size());
 //            System.out.println(current.getId());
             Path.add(current);
-            double min = 100000.0;
+            double min = 1000000.0;
+
             City nearestCity = null;
             for (City c: cities) {
                 if (marked[c.getId()]) {
                     continue;
                 }
+
                 double dis = current.computeDistance(c);
-                if (dis<min) {
-                    min =dis;
-                    nearestCity = c;
+                if (c.getId()==811) {
+                    System.out.print(current.getId() + "   :");
+                    System.out.println(dis);
                 }
+                if (dis<min) {
+                min =dis;
+                nearestCity = c;
             }
+        }
             if (nearestCity == null) {
                 break;
             }
@@ -71,12 +78,15 @@ public class GreedySearch {
         }
 
 //        System.out.println("total distance: "+ total);
+        System.out.println(start + " : " + Path.size());
         return total;
     }
 
     public static void main(String[] args) {
-        GenerateCities f = new GenerateCities("src/travelingtest.txt");
+        GenerateCities f = new GenerateCities("src/travelinngtest2015");
         GreedySearch m = new GreedySearch(f.getCities());
+//        double a =  f.getCities().get(969-1).computeDistance(f.getCities().get(811-1));
+//        System.out.println(a);
     }
 
 

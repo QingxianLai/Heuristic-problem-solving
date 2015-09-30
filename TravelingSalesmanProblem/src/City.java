@@ -31,6 +31,7 @@ public class City {
         int xDistance = this.x - city.getX();
         int yDistance = this.y - city.getY();
         int zDistance = this.z - city.getZ();
+
         return Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
     }
 }
