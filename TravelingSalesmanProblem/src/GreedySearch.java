@@ -27,6 +27,7 @@ public class GreedySearch {
 //        System.out.println("min: " + min);
 //        System.out.println("minStart: " + minStart);
         Search(968);
+        Search(0);
     }
 
     public List<City> getPath(){
@@ -44,11 +45,8 @@ public class GreedySearch {
 
         while (true) {
             marked[current.getId()] = true;
-//            System.out.println(Path.size());
-//            System.out.println(current.getId());
             Path.add(current);
             double min = 1000000.0;
-
             City nearestCity = null;
             for (City c: cities) {
                 if (marked[c.getId()]) {
@@ -69,16 +67,12 @@ public class GreedySearch {
                 break;
             }
             total += min;
-
-            //print
-//            System.out.println(lineCount+" City: " + nearestCity.getId() + "   Distance: "+ min);
-
             current = nearestCity;
-
         }
 
 //        System.out.println("total distance: "+ total);
         System.out.println(start + " : " + Path.size());
+
         return total;
     }
 
