@@ -10,11 +10,15 @@ public class MyStrategy extends NoTippingPlayer {
     private int player;
     private Set<Integer> weights;
     private Set<Integer> weightsReversed;
+    
     private List<Weight> weightsOnBoard;
     private int leftWight;
     private int rightWeight;
     private int[] board;
     private boolean firstRemove;
+
+    private Set<Integer> opponentWeight;
+    private Set<Integer> opponentWeightReserved;
 
     public MyStrategy(int port) {
         super(port);
@@ -42,6 +46,22 @@ public class MyStrategy extends NoTippingPlayer {
                     return t1 - integer;
                 }
             });
+            opponentWeight = new TreeSet<Integer>(new Comparator<Integer>() {
+                
+                @Override
+                public int compare(Integer integer, Integer t1) {
+                    return integer - t1;
+                }
+            });
+
+            opponentWeightReserved = new TreeSet<Integer>(new Comparator<Integer>() {
+                
+                @Override
+                public int compare(Integer integer, Integer t1) {
+                    return t1 - integer;
+                }
+            });
+
             for (int i = 1; i <= 15; i ++) {
                 weights.add(i);
                 weightsReversed.add(i);
