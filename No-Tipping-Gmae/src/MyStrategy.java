@@ -128,7 +128,7 @@ public class MyStrategy extends NoTippingPlayer {
 
     public Weight playerOneMakeAddMove() {
         for (Integer weight : weightsReversed) {
-            for (int pos = 24; pos >= 0; pos--) {
+            for (int pos = 25; pos >= 0; pos--) {
                 //System.out.println("1: " + "weight = " + weight + " postion = " + pos);
                 if (board[pos + 25] == 0) {
                     if (validAddMove(weight, pos, weightsOnBoard)) {
@@ -408,8 +408,44 @@ public class MyStrategy extends NoTippingPlayer {
                 }
             }
 
+        } else {
+            int max = 0;
+            for (Weight weight: removeCandidate) {
+                //System.out.println(weight);
+                if (weight.position != -4 && (weight.position + 1) * weight.weight > max &&
+                        canRemove(weight, removeCandidate)) {
+                    max = (1 + weight.position) * weight.weight;
+                    target = weight;
+                }
+            }
+            if (target != null) {
+                removeCandidate.remove(target);
+                weightsOnBoard.remove(target);
+                return target;
+            } else {
+                int min = Integer.MAX_VALUE;
+                for (Weight weight: removeCandidate) {
+                    if (weight.position < -3 && (-1 - weight.position) * weight.weight < min &&
+                            canRemove(weight, removeCandidate)) {
+                        min = (-1 - weight.position) * weight.weight;
+                        target = weight;
+                    }
+                }
+                if (target != null) {
+                    removeCandidate.remove(target);
+                    weightsOnBoard.remove(target);
+                    return target;
+                }
+            }
         }
-        return null;
+        //we lose here
+        for (Weight weight: removeCandidate) {
+            if (weight.position != -4) {
+                target = weight;
+                break;
+            }
+        }
+        return target;
     }
 
     public Weight playerTwoMakeRemoveMove() {
@@ -420,11 +456,11 @@ public class MyStrategy extends NoTippingPlayer {
         }
         Weight target = null;
         int max = -1;
-        System.out.println("remove candidates: " + removeCandidate);
+        /* System.out.println("remove candidates: " + removeCandidate); */
         for (Weight weight: removeCandidate) {
-            System.out.println("candidate: " + weight);
+            /* System.out.println("candidate: " + weight); */
             if (canRemove(weight, weightsOnBoard)) {
-                System.out.println("player two move: " + weight);
+                /* System.out.println("player two move: " + weight); */
                 List<Weight> cloneBoard = new ArrayList<Weight>(weightsOnBoard);
                 //int curIdx = weightsOnBoard.indexOf(weight);
                 cloneBoard.remove(weight);
@@ -433,8 +469,8 @@ public class MyStrategy extends NoTippingPlayer {
                     if (playerOneWeight.position != -4 && canRemove(playerOneWeight, cloneBoard)) {
                         List<Weight> cloneBoardTwo = new ArrayList<Weight>(cloneBoard);
 
-                        System.out.println("player one move: " + playerOneWeight + " num: " +
-                                playerTwoMovableNum(cloneBoardTwo));
+                        /* System.out.println("player one move: " + playerOneWeight + " num: " + */
+                                /* playerTwoMovableNum(cloneBoardTwo)); */
                         if (playerTwoMovableNum(cloneBoardTwo) < min) {
                             min = playerTwoMovableNum(cloneBoardTwo);
                         }
@@ -453,7 +489,7 @@ public class MyStrategy extends NoTippingPlayer {
                 return weight;
             }
         }
-        System.out.println("final remove: " + target);
+        /* System.out.println("final remove: " + target); */
         weightsOnBoard.remove(target);
         return target;
     }
