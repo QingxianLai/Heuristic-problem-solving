@@ -205,8 +205,13 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     public Weight playerTwoMakeAddMove(int playerOneLastMovePos) {
+        OptPair opt;
 
-        OptPair opt = optimizedMove(false, 3, player);
+        if (weightsOnBoard.size()<=20) {
+            opt = optimizedMove(false, 3, player);
+        } else {
+            opt = optimizedMove(false, 4, player);
+        }
 
         return opt.getWeight();
     }
@@ -329,20 +334,36 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     private int getPlayer2AbsoluteDifferent() {
-        int left = 1;
-        int right = 0;
+        int left1 = 1;
+        int right1 = 0;
+        int left2 = 1;
+        int right2 = 0;
+
+//        int leftWeight = 3;
+//        int rightWeight = 0;
         for (Weight wat : weightsOnBoard) {
             if (wat.player == 1) {
-                if (wat.position <= -3) {
-                    left++;
+                if (wat.position < -3) {
+                    left1++;
+//                    leftWeight += wat.weight * (-3 - wat.position);
                 }
-                if (wat.position >= -1) {
-                    right++;
+                if (wat.position < -1) {
+                    left2++;
+                }
+                if (wat.position > -3) {
+                    right1++;
+//                    rightWeight += wat.weight * (wat.position + 1);
+                }
+
+                if (wat.position > -1) {
+                    right2++;
                 }
             }
         }
-        int diff = Math.abs(right - left);
-        return diff;
+        int diff1 = Math.abs(right1 - left1);
+        int diff2 = Math.abs(right2 - left2);
+//        int diff = Math.abs(rightWeight - leftWeight);
+        return Math.max(diff1, diff2);
     }
 
     public Weight playerOneMakeRemoveMove() {
