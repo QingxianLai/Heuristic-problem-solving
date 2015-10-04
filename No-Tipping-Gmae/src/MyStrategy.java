@@ -19,6 +19,7 @@ public class MyStrategy extends NoTippingPlayer {
 
     private Set<Integer> opponentWeight;
     private Set<Integer> opponentWeightReserved;
+    private int absoluteDifferent;
 
     public MyStrategy(int port) {
         super(port);
@@ -32,7 +33,7 @@ public class MyStrategy extends NoTippingPlayer {
             weightsOnBoard = new ArrayList<Weight>();
             // put the original 3 kg block on board
             weightsOnBoard.add(new Weight(3, -4, 1));
-            board = new int[50];
+            board = new int[51];
             board[-4 + 25] = 3;
             weights = new TreeSet<Integer>(new Comparator<Integer>() {
                 @Override
@@ -53,7 +54,6 @@ public class MyStrategy extends NoTippingPlayer {
                     return integer - t1;
                 }
             });
-
             opponentWeightReserved = new TreeSet<Integer>(new Comparator<Integer>() {
                 
                 @Override
@@ -65,6 +65,8 @@ public class MyStrategy extends NoTippingPlayer {
             for (int i = 1; i <= 15; i ++) {
                 weights.add(i);
                 weightsReversed.add(i);
+                opponentWeight.add(i);
+                opponentWeightReserved.add(i);
             }
             hasStarted = true;
         }
@@ -84,6 +86,8 @@ public class MyStrategy extends NoTippingPlayer {
             // execute previous player's move
             if (command.equals("ADDING")) {
                 weightsOnBoard.add(new Weight(weight, position, (player + 1) % 2));
+                opponentWeight.remove(weight);
+                opponentWeightReserved.remove(weight);
                 board[position + 25] = weight;
             } else {
                 // The last user add will end up with the following message
@@ -104,9 +108,10 @@ public class MyStrategy extends NoTippingPlayer {
             } else {
                 decision = playerTwoMakeAddMove(position);
             }
-
             // update board
             weightsOnBoard.add(decision);
+            weights.remove(decision.weight);
+            board[decision.position+25] = decision.weight;
         } else {
             if (this.player == 0) {
                 decision = playerOneMakeRemoveMove();
@@ -181,8 +186,163 @@ public class MyStrategy extends NoTippingPlayer {
         return returnLosingMove;
     }
 
+    private class OptPair {
+        private Weight w;
+        private int opt;
+
+        public OptPair(Weight weight, int opti) {
+            this.w = weight;
+            this.opt = opti;
+        }
+
+        public Weight getWeight() {
+            return w;
+        }
+
+        public int getOpt() {
+            return opt;
+        }
+    }
+
     public Weight playerTwoMakeAddMove(int playerOneLastMovePos) {
-        return null;
+
+        OptPair opt = optimizedMove(false, 3, player);
+
+        return opt.getWeight();
+    }
+
+    private OptPair optimizedMove(boolean isMax, int maxDepth, int player) {
+//        System.out.println("opt: isMax = " + isMax + ", maxDepth = " + maxDepth + ", player = " + player);
+        Set<Integer> currentWeights = new HashSet<Integer>(player == this.player ? weights : opponentWeight);
+        Set<Integer> weightsAvailable = player == this.player ? weights : opponentWeight;
+        int nextPlayer = (player + 1) % 2;
+
+        OptPair res;
+
+        if (isMax) {
+            isMax = !isMax;
+            int maxValue = -1;
+            Weight maxWeight = null;
+            for (int w : currentWeights) {
+                weightsAvailable.remove(w);
+                for (int i = 0; i < board.length; i++) {
+
+                    if (!validAddMove(w, i - 25, weightsOnBoard)) {
+                        continue;
+                    }
+                    Weight weight = new Weight(w, i - 25, player);
+                    board[i] = w;
+                    weightsOnBoard.add(weight);
+
+                    if (maxDepth > 1) {
+                        OptPair pair = optimizedMove(isMax, maxDepth - 1, nextPlayer);
+                        if (pair.getOpt() > maxValue) {
+                            maxValue = pair.getOpt();
+                            maxWeight = weight;
+                        } else if(pair.getOpt() == maxValue) {
+                            boolean val = new Random().nextInt(2)==0;
+                            if (val) {
+                                maxValue = pair.getOpt();
+                                maxWeight = weight;
+                            }
+                        }
+//                        System.out.println("maxValue:" + maxValue + "; maxWeight" + maxWeight);
+                    } else {
+                        int diff = getPlayer2AbsoluteDifferent();
+                        if (diff > maxValue) {
+                            maxValue = diff;
+                            maxWeight = weight;
+                        } else if(diff == maxValue) {
+                            boolean val = new Random().nextInt(2)==0;
+                            if (val) {
+                                maxValue = diff;
+                                maxWeight = weight;
+                            }
+                        }
+                    }
+
+                    board[i] = 0;
+                    weightsOnBoard.remove(weight);
+                }
+                weightsAvailable.add(w);
+            }
+
+            res = new OptPair(maxWeight, maxValue);
+        } else {
+            isMax = !isMax;
+            int minValue = Integer.MAX_VALUE;
+            Weight minWeight = null;
+            for (int w : currentWeights) {
+                weightsAvailable.remove(w);
+                for (int i = 0; i < board.length; i++) {
+//                    System.out.println("weight: " + w + ", position:" + (i-25));
+//                    System.out.println(validAddMove(w, i - 25, weightsOnBoard));
+                    boolean verify = !validAddMove(w, i-25, weightsOnBoard);
+                    if (!validAddMove(w, i - 25, weightsOnBoard)) {
+                        continue;
+                    }
+                    Weight weight = new Weight(w, i - 25, player);
+                    board[i] = w;
+                    weightsOnBoard.add(weight);
+
+                    if (maxDepth > 1) {
+                        OptPair pair = optimizedMove(isMax, maxDepth - 1, nextPlayer);
+                        if (pair.getOpt() < minValue) {
+//                            System.out.println("weight: " + weight + " verify:" + verify);
+                            minValue = pair.getOpt();
+                            minWeight = weight;
+                        } else if(pair.getOpt() == minValue) {
+                            boolean val = new Random().nextInt(2)==0;
+                            if (val) {
+                                minValue = pair.getOpt();
+                                minWeight = weight;
+                            }
+                        }
+//                        System.out.println("minValue:" + minValue + "; minWeight" + minWeight);
+//                        System.out.println(validAddMove(minWeight.weight, minWeight.position, weightsOnBoard));
+
+                    } else {
+                        int diff = getPlayer2AbsoluteDifferent();
+                        if (diff < minValue) {
+
+                            minValue = diff;
+                            minWeight = weight;
+                        } else if(diff == minValue) {
+                            boolean val = new Random().nextInt(2)==0;
+                            if (val) {
+                                minValue = diff;
+                                minWeight = weight;
+                            }
+                        }
+                    }
+                    board[i] = 0;
+                    weightsOnBoard.remove(weight);
+//                    System.out.println("minValue:" + minValue + "; minWeight" + minWeight);
+//                    System.out.println(validAddMove(minWeight.weight, minWeight.position, weightsOnBoard));
+                }
+                weightsAvailable.add(w);
+            }
+            res = new OptPair(minWeight, minValue);
+        }
+//        System.out.println(validAddMove(res.getWeight().weight, res.getWeight().position, weightsOnBoard));
+        return res;
+    }
+
+    private int getPlayer2AbsoluteDifferent() {
+        int left = 1;
+        int right = 0;
+        for (Weight wat : weightsOnBoard) {
+            if (wat.player == 1) {
+                if (wat.position <= -3) {
+                    left++;
+                }
+                if (wat.position >= -1) {
+                    right++;
+                }
+            }
+        }
+        int diff = Math.abs(right - left);
+        return diff;
     }
 
     public Weight playerOneMakeRemoveMove() {
@@ -236,6 +396,9 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     private boolean validAddMove(int weight, int position, List<Weight> weights_on_board) {
+        if (board[position+25]!=0) {
+            return false;
+        }
         List<Weight> temp = new ArrayList<Weight>();
         for (Weight w: weights_on_board) {
             temp.add(w);
