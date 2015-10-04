@@ -377,9 +377,9 @@ public class MyStrategy extends NoTippingPlayer {
                 }
             }
         }
+        Weight target = null;
         if (leftWight < rightWeight) {
             int max = 0;
-            Weight target = null;
             for (Weight weight: removeCandidate) {
                 //System.out.println(weight);
                 if (weight.position != -4 && (-1 - weight.position) * weight.weight > max &&
