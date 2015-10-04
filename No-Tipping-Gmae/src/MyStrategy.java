@@ -347,6 +347,15 @@ public class MyStrategy extends NoTippingPlayer {
 
     public Weight playerOneMakeRemoveMove() {
         List<Weight> removeCandidate = new ArrayList<Weight>(weightsOnBoard);
+        for (Weight weight: removeCandidate) {
+            List<Weight> cloneBoard = new ArrayList<Weight>(weightsOnBoard);
+            if (weight.position != -4 && canRemove(weight, cloneBoard)) {
+                cloneBoard.remove((weight));
+                if (playerTwoMovableNum(cloneBoard) == 0) {
+                    return weight;
+                }
+            }
+        }
         if (leftWight < rightWeight) {
             int max = 0;
             Weight target = null;
@@ -383,7 +392,60 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     public Weight playerTwoMakeRemoveMove() {
-        return null; 
+        List<Weight> removeCandidate = getMyBlocks(weightsOnBoard, player);
+        if (removeCandidate.size() == 0){
+            // no more player 2 blocks
+            removeCandidate = weightsOnBoard;
+        }
+        Weight target = null;
+        int max = -1;
+        System.out.println("remove candidates: " + removeCandidate);
+        for (Weight weight: removeCandidate) {
+            System.out.println("candidate: " + weight);
+            if (canRemove(weight, weightsOnBoard)) {
+                System.out.println("player two move: " + weight);
+                List<Weight> cloneBoard = new ArrayList<Weight>(weightsOnBoard);
+                //int curIdx = weightsOnBoard.indexOf(weight);
+                cloneBoard.remove(weight);
+                int min = Integer.MAX_VALUE;
+                for (Weight playerOneWeight: cloneBoard) {
+                    if (playerOneWeight.position != -4 && canRemove(playerOneWeight, cloneBoard)) {
+                        List<Weight> cloneBoardTwo = new ArrayList<Weight>(cloneBoard);
+
+                        System.out.println("player one move: " + playerOneWeight + " num: " +
+                                playerTwoMovableNum(cloneBoardTwo));
+                        if (playerTwoMovableNum(cloneBoardTwo) < min) {
+                            min = playerTwoMovableNum(cloneBoardTwo);
+                        }
+                    }
+                }
+                if (min > max) {
+                    max = min;
+                    target = weight;
+                }
+            }
+        }
+        // we lost
+        if (target == null) {
+            for (Weight weight: removeCandidate) {
+                weightsOnBoard.remove(weight);
+                return weight;
+            }
+        }
+        System.out.println("final remove: " + target);
+        weightsOnBoard.remove(target);
+        return target;
+    }
+    
+    private int playerTwoMovableNum(List<Weight> board) {
+        int count = 0;
+        List<Weight> removeCandidate = getMyBlocks(board, 1);
+        for (Weight weight: removeCandidate) {
+            if (canRemove(weight, board)) {
+                count += 1;
+            }
+        }
+        return count;
     }
 
     private boolean canRemove(Weight weight, List<Weight> weights_on_board) {
