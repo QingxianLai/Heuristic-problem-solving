@@ -205,13 +205,7 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     public Weight playerTwoMakeAddMove(int playerOneLastMovePos) {
-        OptPair opt;
-
-        if (weightsOnBoard.size()<=20) {
-            opt = optimizedMove(false, 3, player);
-        } else {
-            opt = optimizedMove(false, 4, player);
-        }
+        OptPair opt = optimizedMove(false, 3, player);
 
         return opt.getWeight();
     }
