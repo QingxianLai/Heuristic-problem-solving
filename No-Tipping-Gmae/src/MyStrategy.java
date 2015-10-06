@@ -396,7 +396,7 @@ public class MyStrategy extends NoTippingPlayer {
         for (Weight weight: removeCandidate) {
             List<Weight> cloneBoard = new ArrayList<Weight>(weightsOnBoard);
             if (canRemove(weight, cloneBoard)) {
-                cloneBoard.remove((weight));
+                cloneBoard.remove(weight);
                 if (playerTwoMovableNum(cloneBoard) == 0) {
                     return weight;
                 }
