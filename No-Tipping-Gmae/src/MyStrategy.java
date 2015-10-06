@@ -395,8 +395,8 @@ public class MyStrategy extends NoTippingPlayer {
         List<Weight> removeCandidate = new ArrayList<Weight>(weightsOnBoard);
         for (Weight weight: removeCandidate) {
             List<Weight> cloneBoard = new ArrayList<Weight>(weightsOnBoard);
-            if (weight.position != -4 && canRemove(weight, cloneBoard)) {
-                cloneBoard.remove((weight));
+            if (canRemove(weight, cloneBoard)) {
+                cloneBoard.remove(weight);
                 if (playerTwoMovableNum(cloneBoard) == 0) {
                     return weight;
                 }
@@ -407,7 +407,7 @@ public class MyStrategy extends NoTippingPlayer {
             int max = 0;
             for (Weight weight: removeCandidate) {
                 //System.out.println(weight);
-                if (weight.position != -4 && (-1 - weight.position) * weight.weight > max &&
+                if ((-1 - weight.position) * weight.weight >= max &&
                         canRemove(weight, removeCandidate)) {
                     max = (-1 - weight.position) * weight.weight;
                     target = weight;
@@ -437,9 +437,9 @@ public class MyStrategy extends NoTippingPlayer {
             int max = 0;
             for (Weight weight: removeCandidate) {
                 //System.out.println(weight);
-                if (weight.position != -4 && (weight.position + 1) * weight.weight > max &&
+                if ((weight.position + 3) * weight.weight >= max &&
                         canRemove(weight, removeCandidate)) {
-                    max = (1 + weight.position) * weight.weight;
+                    max = (3 + weight.position) * weight.weight;
                     target = weight;
                 }
             }
@@ -450,9 +450,9 @@ public class MyStrategy extends NoTippingPlayer {
             } else {
                 int min = Integer.MAX_VALUE;
                 for (Weight weight: removeCandidate) {
-                    if (weight.position < -3 && (-1 - weight.position) * weight.weight < min &&
+                    if (weight.position < -3 && (-3 - weight.position) * weight.weight < min &&
                             canRemove(weight, removeCandidate)) {
-                        min = (-1 - weight.position) * weight.weight;
+                        min = (-3 - weight.position) * weight.weight;
                         target = weight;
                     }
                 }
@@ -465,10 +465,7 @@ public class MyStrategy extends NoTippingPlayer {
         }
         //we lose here
         for (Weight weight: removeCandidate) {
-            if (weight.position != -4) {
-                target = weight;
-                break;
-            }
+            target = weight;
         }
         return target;
     }
@@ -491,8 +488,9 @@ public class MyStrategy extends NoTippingPlayer {
                 cloneBoard.remove(weight);
                 int min = Integer.MAX_VALUE;
                 for (Weight playerOneWeight: cloneBoard) {
-                    if (playerOneWeight.position != -4 && canRemove(playerOneWeight, cloneBoard)) {
+                    if (canRemove(playerOneWeight, cloneBoard)) {
                         List<Weight> cloneBoardTwo = new ArrayList<Weight>(cloneBoard);
+                        cloneBoardTwo.remove(playerOneWeight);
 
                         /* System.out.println("player one move: " + playerOneWeight + " num: " + */
                                 /* playerTwoMovableNum(cloneBoardTwo)); */
