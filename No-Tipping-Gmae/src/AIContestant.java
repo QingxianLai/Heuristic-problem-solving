@@ -34,7 +34,7 @@ public class AIContestant extends NoTippingPlayer{
             weights_on_board = new ArrayList<Weight>();
             // put the original 3 kg block on board
             weights_on_board.add(new Weight(3, -4, 1));
-            board = new int[50];
+            board = new int[51];
             board[-4+25] = 3;
             firstRemove = false;
         }

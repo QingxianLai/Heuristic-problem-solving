@@ -205,13 +205,16 @@ public class MyStrategy extends NoTippingPlayer {
     }
 
     public Weight playerTwoMakeAddMove(int playerOneLastMovePos) {
-        OptPair opt = optimizedMove(false, 3, player);
-
+        OptPair opt;
+        if (weightsOnBoard.size() > 26) {
+            opt = optimizedMove(false, 2, player);
+        } else {
+            opt = optimizedMove(false, 3, player);
+        }
         return opt.getWeight();
     }
 
     private OptPair optimizedMove(boolean isMax, int maxDepth, int player) {
-//        System.out.println("opt: isMax = " + isMax + ", maxDepth = " + maxDepth + ", player = " + player);
         Set<Integer> currentWeights = new HashSet<Integer>(player == this.player ? weights : opponentWeight);
         Set<Integer> weightsAvailable = player == this.player ? weights : opponentWeight;
         int nextPlayer = (player + 1) % 2;
@@ -245,7 +248,6 @@ public class MyStrategy extends NoTippingPlayer {
                                 maxWeight = weight;
                             }
                         }
-//                        System.out.println("maxValue:" + maxValue + "; maxWeight" + maxWeight);
                     } else {
                         int diff = getPlayer2AbsoluteDifferent();
                         if (diff > maxValue) {
@@ -274,8 +276,6 @@ public class MyStrategy extends NoTippingPlayer {
             for (int w : currentWeights) {
                 weightsAvailable.remove(w);
                 for (int i = 0; i < board.length; i++) {
-//                    System.out.println("weight: " + w + ", position:" + (i-25));
-//                    System.out.println(validAddMove(w, i - 25, weightsOnBoard));
                     boolean verify = !validAddMove(w, i-25, weightsOnBoard);
                     if (!validAddMove(w, i - 25, weightsOnBoard)) {
                         continue;
@@ -287,7 +287,6 @@ public class MyStrategy extends NoTippingPlayer {
                     if (maxDepth > 1) {
                         OptPair pair = optimizedMove(isMax, maxDepth - 1, nextPlayer);
                         if (pair.getOpt() < minValue) {
-//                            System.out.println("weight: " + weight + " verify:" + verify);
                             minValue = pair.getOpt();
                             minWeight = weight;
                         } else if(pair.getOpt() == minValue) {
@@ -297,8 +296,6 @@ public class MyStrategy extends NoTippingPlayer {
                                 minWeight = weight;
                             }
                         }
-//                        System.out.println("minValue:" + minValue + "; minWeight" + minWeight);
-//                        System.out.println(validAddMove(minWeight.weight, minWeight.position, weightsOnBoard));
 
                     } else {
                         int diff = getPlayer2AbsoluteDifferent();
@@ -316,14 +313,11 @@ public class MyStrategy extends NoTippingPlayer {
                     }
                     board[i] = 0;
                     weightsOnBoard.remove(weight);
-//                    System.out.println("minValue:" + minValue + "; minWeight" + minWeight);
-//                    System.out.println(validAddMove(minWeight.weight, minWeight.position, weightsOnBoard));
                 }
                 weightsAvailable.add(w);
             }
             res = new OptPair(minWeight, minValue);
         }
-//        System.out.println(validAddMove(res.getWeight().weight, res.getWeight().position, weightsOnBoard));
         return res;
     }
 
@@ -332,32 +326,69 @@ public class MyStrategy extends NoTippingPlayer {
         int right1 = 0;
         int left2 = 1;
         int right2 = 0;
+        
+        int redLeft1 = 0;
+        int redLeft2 = 0;
+        int redRight1 = 0;
+        int redRight2 = 0;
+
+
 
 //        int leftWeight = 3;
 //        int rightWeight = 0;
+        int redRightWeight=0;
+        int redLeftWeight = 0;
         for (Weight wat : weightsOnBoard) {
             if (wat.player == 1) {
                 if (wat.position < -3) {
                     left1++;
 //                    leftWeight += wat.weight * (-3 - wat.position);
                 }
-                if (wat.position < -1) {
-                    left2++;
-                }
-                if (wat.position > -3) {
-                    right1++;
-//                    rightWeight += wat.weight * (wat.position + 1);
-                }
+                //if (wat.position < -1) {
+                    //left2++;
+                //}
+                //if (wat.position > -3) {
+                    //right1++;
+                    //rightWeight += wat.weight * (wat.position + 1);
+                //}
 
                 if (wat.position > -1) {
                     right2++;
                 }
+            } else {
+                if (wat.position < -3) {
+                    redLeft1++;
+                    redLeftWeight += wat.weight * (-3 - wat.position);
+                }
+                //if (wat.position < -1) {
+                    //redLeft2++;
+                //}
+                //if (wat.position > -3) {
+                    //redRight1++;
+                    //rightWeight += wat.weight * (wat.position + 1);
+                //}
+
+                if (wat.position > -1) {
+                    redRight2++;
+                    redRightWeight += wat.weight*(wat.position + 1);
+                }
             }
         }
-        int diff1 = Math.abs(right1 - left1);
-        int diff2 = Math.abs(right2 - left2);
+        //int diff1 = Math.abs(right1 - left1);
+        //int diff2 = Math.abs(right2 - left2);
+        int leftDiff = Math.abs(left1-redLeft1);
+        int rightDiff = Math.abs(right2-redRight2);
 //        int diff = Math.abs(rightWeight - leftWeight);
-        return Math.max(diff1, diff2);
+        //if (redLeft1 > redRight2) {
+            //return redLeft1;
+        //} else if (redLeft1 < redRight2){
+            //return redRight2;
+        //} else if (redLeftWeight >= redRightWeight) {
+            //return redLeft1;
+        //} else {
+            //return redRight2;
+        //}
+        return Math.max(redLeft1, redRight2);
     }
 
     public Weight playerOneMakeRemoveMove() {
