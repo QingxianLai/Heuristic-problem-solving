@@ -407,7 +407,7 @@ public class MyStrategy extends NoTippingPlayer {
             int max = 0;
             for (Weight weight: removeCandidate) {
                 //System.out.println(weight);
-                if ((-1 - weight.position) * weight.weight > max &&
+                if ((-1 - weight.position) * weight.weight >= max &&
                         canRemove(weight, removeCandidate)) {
                     max = (-1 - weight.position) * weight.weight;
                     target = weight;
@@ -437,9 +437,9 @@ public class MyStrategy extends NoTippingPlayer {
             int max = 0;
             for (Weight weight: removeCandidate) {
                 //System.out.println(weight);
-                if ((weight.position + 1) * weight.weight > max &&
+                if ((weight.position + 3) * weight.weight >= max &&
                         canRemove(weight, removeCandidate)) {
-                    max = (1 + weight.position) * weight.weight;
+                    max = (3 + weight.position) * weight.weight;
                     target = weight;
                 }
             }
@@ -450,9 +450,9 @@ public class MyStrategy extends NoTippingPlayer {
             } else {
                 int min = Integer.MAX_VALUE;
                 for (Weight weight: removeCandidate) {
-                    if (weight.position < -3 && (-1 - weight.position) * weight.weight < min &&
+                    if (weight.position < -3 && (-3 - weight.position) * weight.weight < min &&
                             canRemove(weight, removeCandidate)) {
-                        min = (-1 - weight.position) * weight.weight;
+                        min = (-3 - weight.position) * weight.weight;
                         target = weight;
                     }
                 }
