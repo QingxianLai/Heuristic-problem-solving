@@ -15,7 +15,7 @@ class KMeans(object):
         self.center_num = 5
         self.patients_num = -1
         self.centers = [[0, 0] for i in range(5)]
-        self.data_set = []
+        self.patients = []
         self.__parse_file()
 
     def __parse_file(self):
@@ -24,9 +24,9 @@ class KMeans(object):
                 for line in f.readlines():
                     line = map(int, line.strip().split(","))
                     patient = Patient(line[0], line[1], line[2])
-                    self.data_set.append(patient)
+                    self.patients.append(patient)
                 f.close()
-                self.patients_num = len(self.data_set)
+                self.patients_num = len(self.patients)
         except Exception, e:
             raise e
 
@@ -36,7 +36,7 @@ class KMeans(object):
     def __init_centers(self):
         for i in range(self.center_num):
             center = randint(0, self.patients_num - 1)
-            self.centers[i] = [self.data_set[center].x, self.data_set[center].y]
+            self.centers[i] = [self.patients[center].x, self.patients[center].y]
     
     def k_means(self):
         cluster_assement = [[-1, -1] for i in range(self.patients_num)]
@@ -49,7 +49,7 @@ class KMeans(object):
                 min_dist = 100000
                 min_index = 0
                 for j in range(self.center_num):
-                    cur_dist = self.__cal_distance(self.centers[j], self.data_set[i])
+                    cur_dist = self.__cal_distance(self.centers[j], self.patients[i])
                     if cur_dist < min_dist:
                         min_dist = cur_dist
                         min_index = j
@@ -62,9 +62,9 @@ class KMeans(object):
                 patients_in_same_cluster = []
                 for k in range(self.patients_num):
                     if cluster_assement[k][0] == j:
-                        patients_in_same_cluster.append(self.data_set[j])
-                x_total = 0.0
-                y_total = 0.0
+                        patients_in_same_cluster.append(self.patients[j])
+                x_total = 0
+                y_total = 0
                 for patient in patients_in_same_cluster:
                     x_total += patient.x
                     y_total += patient.y
