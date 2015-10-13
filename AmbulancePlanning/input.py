@@ -24,6 +24,9 @@ class Hospital(object):
         """docstring for set_coord"""
         self.x = x
         self.y = y
+    
+    def __repr__(self):
+        return "ambu: " + str(self.ambu) + " x: " + str(self.x) + " y: " + str(self.y)
 
 
 def read_from_file(path, num_patients=300, num_hospitals=5):

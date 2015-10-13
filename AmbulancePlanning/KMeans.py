@@ -1,44 +1,33 @@
-from random import randint
-
-class Patient(object):
-    def __init__(self, x, y, time):
-        self.x = x
-        self.y = y
-        self.time = time
-    
-    def __repr__(self):
-        return "x: " + str(self.x) + " y: " + str(self.y) + " time: " + str(self.time)
+import random
+from input import *
+import collections
+import operator
+import itertools
 
 class KMeans(object):
     def __init__(self, file_name):
         self.file_name = file_name
         self.center_num = 5
-        self.patients_num = -1
+        self.patients_num = 300
         self.centers = [[0, 0] for i in range(5)]
         self.patients = []
-        self.__parse_file()
+        self.hospitals = []
+        self.hospitals_patients = {}
 
-    def __parse_file(self):
-        try:
-            with open(self.file_name, "r") as f:
-                for line in f.readlines():
-                    line = map(int, line.strip().split(","))
-                    patient = Patient(line[0], line[1], line[2])
-                    self.patients.append(patient)
-                f.close()
-                self.patients_num = len(self.patients)
-        except Exception, e:
-            raise e
+    def __init_patients_hospitals(self):
+        self.patients, self.hospitals = read_from_file(self.file_name)
+        self.hospitals = sorted(self.hospitals, key=operator.attrgetter('ambu'))
 
     def __cal_distance(self, vector, patient):
         return abs(vector[0] - patient.x) + abs(vector[1] - patient.y)
 
     def __init_centers(self):
-        for i in range(self.center_num):
-            center = randint(0, self.patients_num - 1)
-            self.centers[i] = [self.patients[center].x, self.patients[center].y]
+        random_sample = random.sample(range(0, self.patients_num - 1), 5)
+        for i in range(len(random_sample)):
+            self.centers[i] = [self.patients[random_sample[i]].x, self.patients[random_sample[i]].y]
     
     def k_means(self):
+        self.__init_patients_hospitals()
         cluster_assement = [[-1, -1] for i in range(self.patients_num)]
         cluster_changed = True
 
@@ -69,13 +58,22 @@ class KMeans(object):
                     x_total += patient.x
                     y_total += patient.y
                 self.centers[j] = [x_total / len(patients_in_same_cluster), y_total / len(patients_in_same_cluster)]
-        return self.centers, cluster_assement
-
+        patient_num = {}
+        for i in range(5):
+            patient_num[i] = len(filter(lambda x: x[0] == i, cluster_assement))
+        ordered_patient_num = sorted(patient_num.items(), key=operator.itemgetter(1))
+        i = 0
+        for k, v in ordered_patient_num:
+            selectors = [x[0] == k for x in cluster_assement]
+            self.hospitals[i].set_coord(self.centers[k][0], self.centers[k][1])
+            self.hospitals_patients[self.hospitals[i]] = list(itertools.compress(self.patients, selectors))
+            i += 1
+        return self.hospitals_patients 
 
 def main():
     kmeans = KMeans("test.txt")
-    centers, cluster_assement = kmeans.k_means() 
-    print centers
+    hospitals_patients = kmeans.k_means() 
+    # print hospitals_patients
 
 if __name__ == '__main__':
     main()
