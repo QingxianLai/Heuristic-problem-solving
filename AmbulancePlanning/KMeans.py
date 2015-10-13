@@ -25,7 +25,7 @@ class KMeans(object):
         random_sample = random.sample(range(0, self.patients_num - 1), 5)
         for i in range(len(random_sample)):
             self.centers[i] = [self.patients[random_sample[i]].x, self.patients[random_sample[i]].y]
-    
+
     def k_means(self):
         self.__init_patients_hospitals()
         cluster_assement = [[-1, -1] for i in range(self.patients_num)]
@@ -68,12 +68,12 @@ class KMeans(object):
             self.hospitals[i].set_coord(self.centers[k][0], self.centers[k][1])
             self.hospitals_patients[self.hospitals[i]] = list(itertools.compress(self.patients, selectors))
             i += 1
-        return self.hospitals_patients 
+        return self.hospitals_patients
 
 def main():
     kmeans = KMeans("test.txt")
-    hospitals_patients = kmeans.k_means() 
-    # print hospitals_patients
+    hospitals_patients = kmeans.k_means()
+    print hospitals_patients.keys()
 
 if __name__ == '__main__':
     main()
