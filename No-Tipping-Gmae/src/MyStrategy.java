@@ -207,9 +207,9 @@ public class MyStrategy extends NoTippingPlayer {
     public Weight playerTwoMakeAddMove(int playerOneLastMovePos) {
         OptPair opt;
         if (weightsOnBoard.size() > 26) {
-            opt = optimizedMove(false, 2, player);
+            opt = optimizedMove(false, 1, player);
         } else {
-            opt = optimizedMove(false, 3, player);
+            opt = optimizedMove(false, 2, player);
         }
         return opt.getWeight();
     }
@@ -336,8 +336,8 @@ public class MyStrategy extends NoTippingPlayer {
 
 //        int leftWeight = 3;
 //        int rightWeight = 0;
-        int redRightWeight=0;
-        int redLeftWeight = 0;
+        //int redRightWeight=0;
+        //int redLeftWeight = 0;
         for (Weight wat : weightsOnBoard) {
             if (wat.player == 1) {
                 if (wat.position < -3) {
@@ -358,7 +358,7 @@ public class MyStrategy extends NoTippingPlayer {
             } else {
                 if (wat.position < -3) {
                     redLeft1++;
-                    redLeftWeight += wat.weight * (-3 - wat.position);
+                    //redLeftWeight += wat.weight * (-3 - wat.position);
                 }
                 //if (wat.position < -1) {
                     //redLeft2++;
@@ -370,14 +370,14 @@ public class MyStrategy extends NoTippingPlayer {
 
                 if (wat.position > -1) {
                     redRight2++;
-                    redRightWeight += wat.weight*(wat.position + 1);
+                    //redRightWeight += wat.weight*(wat.position + 1);
                 }
             }
         }
         //int diff1 = Math.abs(right1 - left1);
         //int diff2 = Math.abs(right2 - left2);
-        int leftDiff = Math.abs(left1-redLeft1);
-        int rightDiff = Math.abs(right2-redRight2);
+        //int leftDiff = Math.abs(left1-redLeft1);
+        //int rightDiff = Math.abs(right2-redRight2);
 //        int diff = Math.abs(rightWeight - leftWeight);
         //if (redLeft1 > redRight2) {
             //return redLeft1;
