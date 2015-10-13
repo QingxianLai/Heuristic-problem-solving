@@ -1,3 +1,4 @@
+person(xloc,yloc,rescuetime)
 68,28,115
 16,77,94
 32,69,144
@@ -296,3 +297,12 @@
 26,43,89
 41,96,143
 11,86,82
+32,56,100
+53,90,60
+
+hospital(xloc,yloc,numambulance)
+3
+5
+8
+8
+4
