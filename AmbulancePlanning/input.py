@@ -9,7 +9,7 @@ class Patient(object):
         self.time = time
 
     def __repr__(self):
-        return "x: " + str(self.x) + " y: " + str(self.y) + " time: " + str(self.time)
+        return "patient: " + str(self.id) + ", x: " + str(self.x) + " y: " + str(self.y) + " time: " + str(self.time)
 
 
 class Hospital(object):
