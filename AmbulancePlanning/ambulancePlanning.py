@@ -32,12 +32,12 @@ class Ambulance(object):
         self.time += dist+1
         self.is_full = False
 
-    def time_left(self):
+    def time_left(self, current_time):
         min_time = 10000
         for patient in self.patients:
             if min_time > patient.time:
                 min_time = patient.time
-        return min_time
+        return min_time - current_time
 
 
 def distance(x1, y1, x2, y2):
@@ -86,9 +86,9 @@ class RescuePlan(object):
             if ambulance.is_full:
                 break
             rescue_time = self._time_of_rescue(ambulance,patient)
-            if rescue_time > ambulance.time_left() or rescue_time > patient.time:
+            if rescue_time > ambulance.time_left(self.current_time) or rescue_time > patient.time:
                 continue
-            if max_time< ambulance.time_left() - rescue_time:
+            if max_time< ambulance.time_left(self.current_time) - rescue_time:
                 max_time = ambulance.time - rescue_time
                 next_patient = patient
         return next_patient
@@ -101,15 +101,15 @@ class RescuePlan(object):
 
     def plan(self):
         """docstring for plan"""
-        current_time = 0
+        self.current_time = 0
         while True:
             if len(self.patients) == 0:
                 break
             next_ambu = self._find_next_ambulance()
             if next_ambu is None:
                 break
-            self._time_elapse(next_ambu.time - current_time)
-            current_time = next_ambu.time
+            self._time_elapse(next_ambu.time - self.current_time)
+            self.current_time = next_ambu.time
             next_patient = self._find_next_patient(next_ambu)
             if next_patient is None:
                 if len(next_ambu.patients) == 0:
