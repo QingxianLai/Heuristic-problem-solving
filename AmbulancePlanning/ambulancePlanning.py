@@ -1,4 +1,4 @@
-import KMeans
+from KMeans import KMeans
 
 class Ambulance(object):
 
@@ -32,12 +32,12 @@ class Ambulance(object):
         self.time += dist+1
         self.is_full = False
 
-    def time_left(self):
+    def time_left(self, current_time):
         min_time = 10000
         for patient in self.patients:
             if min_time > patient.time:
                 min_time = patient.time
-        return min_time
+        return min_time - current_time
 
 
 def distance(x1, y1, x2, y2):
@@ -47,9 +47,12 @@ def distance(x1, y1, x2, y2):
 class RescuePlan(object):
     def __init__(self, hospital, patients):
         """docstring for __init__"""
+        print hospital
+        # print patients
         self.hospital = hospital
         self.patients = patients
         self.time = 0
+        self.save_count = 0
         self.ambulances = []
         for i in xrange(hospital.ambu):
             amb = Ambulance(i+1, hospital)
@@ -57,6 +60,8 @@ class RescuePlan(object):
 
     def _find_next_ambulance(self):
         """docstring for find_next"""
+        if len(self.ambulances) == 0:
+            return None
         latest_ambu = self.ambulances[0]
         latest_time = latest_ambu.time
         for ambu in self.ambulances:
@@ -78,12 +83,13 @@ class RescuePlan(object):
         next_patient = None
         max_time = 0
         for patient in self.patients:
+            if ambulance.is_full:
+                break
             rescue_time = self._time_of_rescue(ambulance,patient)
-            if ambulance.is_full or rescue_time > ambulance.time_left() or \
-                    rescue_time > patient.time:
+            if rescue_time > ambulance.time_left(self.current_time) or rescue_time > patient.time:
                 continue
-            if max_time< ambulance.time_left() - rescue_time:
-                max_time = ambulance.time() - rescue_time
+            if max_time< ambulance.time_left(self.current_time) - rescue_time:
+                max_time = ambulance.time - rescue_time
                 next_patient = patient
         return next_patient
 
@@ -95,33 +101,43 @@ class RescuePlan(object):
 
     def plan(self):
         """docstring for plan"""
-        current_time = 0
+        self.current_time = 0
         while True:
             if len(self.patients) == 0:
                 break
             next_ambu = self._find_next_ambulance()
-            self._time_elapse(next_ambu.time - current_time)
+            if next_ambu is None:
+                break
+            self._time_elapse(next_ambu.time - self.current_time)
+            self.current_time = next_ambu.time
             next_patient = self._find_next_patient(next_ambu)
             if next_patient is None:
                 if len(next_ambu.patients) == 0:
                     # TODO: save result here
                     self.ambulances.remove(next_ambu)
                 else:
+                    self.save_count += next_ambu.patients.__len__()
                     next_ambu.return_to_hospital()
             else:
-                next_ambu.pick_up(next_patient)
-
+                time_need = distance(next_ambu.x, next_ambu.y, next_patient.x,
+                                     next_patient.y)
+                next_ambu.pick_up(next_patient, time_need+1)
+                # print next_patient
+                self.patients.remove(next_patient)
+        # print self.save_count
+        return self.save_count
 
 def main():
     """docstring for main"""
     kmeans = KMeans("test.txt")
     clusters = kmeans.k_means()
     plan = {}
+    saved_num = 0
     for item in clusters.items():
         cluster_plan = RescuePlan(item[0], item[1])
-        solution = cluster_plan.plan()
-        plan[item[0]] = solution
-
+        num = cluster_plan.plan()
+        saved_num += num
+    print "saved %s patients" % saved_num
 
 if __name__ == '__main__':
     main()
