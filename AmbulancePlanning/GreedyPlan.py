@@ -83,7 +83,6 @@ class GreedyPlan(object):
                     ambulance.y = hospital.y
                 if len(self.saved_patients) == pre_num:
                     break
-        print len(self.saved_patients) 
 
 def main():
     plan = GreedyPlan(sys.argv[1])
