@@ -16,7 +16,6 @@ class GreedyPlan(object):
     def __init__(self, file_name):
         self.file_name = file_name
         self.saved_patients = []
-        self.ambulance_patients = {}
 
     def __savable(self, patient, ambulance, hospital, i):
         return patient.time - self.__distance(patient, ambulance) - ambulance.current_time > (1 + (4 - i) * 0.1) * self.__distance(patient, hospital)
@@ -42,7 +41,6 @@ class GreedyPlan(object):
 
         k = 1
         print
-        ambulance_id = {}
         for hospital in sorted_hospitals:
             patients = filter(lambda x: x.time >  2.3 * (abs(x.x - hospital.x) + abs(x.y - hospital.y)),hospitals[hospital])
             
@@ -50,7 +48,6 @@ class GreedyPlan(object):
             ambulances = []
             for i in range(ambu_num):
                 ambulances.append(Ambulance(k, hospital))
-                ambulance_id[ambulances[-1].id] = ambulances[-1]
                 k += 1
             while True:
                 pre_num = len(self.saved_patients)
@@ -79,11 +76,6 @@ class GreedyPlan(object):
                                 first = False
                             else:
                                 sys.stdout.write(";" + str(patient.id) + "," + str(patient.x) + "," + str(patient.y) + "," + str(patient.time))
-                            if ambulance.id not in self.ambulance_patients:
-                                self.ambulance_patients[ambulance.id] = []
-                                self.ambulance_patients[ambulance.id].append(patient)
-                            else:
-                                self.ambulance_patients[ambulance.id].append(patient)
                             self.saved_patients.append(patient)
                     sys.stdout.write("|" + str(hospital.x) + "," + str(hospital.y) + "\n")
                     ambulance.patients = []
@@ -91,14 +83,6 @@ class GreedyPlan(object):
                     ambulance.y = hospital.y
                 if len(self.saved_patients) == pre_num:
                     break
-        # for id in range(1, ambulance_num + 1):
-        #     f.write("Ambulance:" + str(id) + "|" + str(ambulance_id[id].x) + "," + str(ambulance_id[id].y) + "|")
-        #     for i in range(len(self.ambulance_patients[id])):
-        #         patient = self.ambulance_patients[id][i]
-        #         if i != len(self.ambulance_patients[id]) - 1:
-        #             f.write(str(patient.id) + "," + str(patient.x) + "," + str(patient.y) + "," + str(patient.time) + ";")
-        #         else:
-        #             f.write(str(patient.id) + "," + str(patient.x) + "," + str(patient.y) + "," + str(patient.time) + "|" + str(ambulance_id[id].x) + "," + str(ambulance_id[id].y) + "\n")
 
 
 def main():
