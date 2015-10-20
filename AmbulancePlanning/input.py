@@ -7,6 +7,11 @@ class Patient(object):
         self.x = x
         self.y = y
         self.time = time
+        self.origin_time = time
+
+    def result_print(self):
+        output = "%s,%s,%s,%s" % (self.id, self.x, self.y, self.origin_time)
+        return output
 
     def __repr__(self):
         return "patient: " + str(self.id) + ", x: " + str(self.x) + " y: " + str(self.y) + " time: " + str(self.time)
@@ -19,11 +24,25 @@ class Hospital(object):
         self.ambu = num_ambulance
         self.x = -1
         self.y = -1
+        self.ambu_list = []
+
+    def add_ambulance(self, ambu):
+        """docstring for add_ambulance"""
+        self.ambu_list.add(ambu);
 
     def set_coord(self, x, y):
         """docstring for set_coord"""
         self.x = x
         self.y = y
+
+    def result_print(self):
+        """docstring for result_print"""
+        output = "Hospital:%s|%s,%s,%s|" % (self.id, self.x, self.y, self.ambu)
+        for ambu in self.ambu_list:
+            output = output + str(ambu.id) + ","
+        output = output[:-1]
+        return output
+
 
     def __repr__(self):
         return "Hospital: " + str(self.id) + " x: " + str(self.x) + " y: " + str(self.y)
