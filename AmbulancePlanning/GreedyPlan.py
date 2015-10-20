@@ -18,7 +18,7 @@ class GreedyPlan(object):
         self.saved_patients = []
 
     def __savable(self, patient, ambulance, hospital, i):
-        return patient.time - self.__distance(patient, ambulance) - ambulance.current_time > (1 + (4 - i) * 0.1) * self.__distance(patient, hospital)
+        return patient.time - self.__distance(patient, ambulance) - ambulance.current_time > (1 + (3 - i) * 0.1) * (self.__distance(patient, hospital) + 1)
     
     def __distance(self, patient, ambulance):
         return abs(patient.x - ambulance.x) + abs(patient.y - ambulance.y)
@@ -83,10 +83,10 @@ class GreedyPlan(object):
                     ambulance.y = hospital.y
                 if len(self.saved_patients) == pre_num:
                     break
-
+        print len(self.saved_patients) 
 
 def main():
-    plan = GreedyPlan("test.txt")
+    plan = GreedyPlan(sys.argv[1])
     plan.strategy()
 
 if __name__ == '__main__':
