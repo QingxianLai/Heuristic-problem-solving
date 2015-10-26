@@ -3,7 +3,6 @@ MANIFEST.in
 README.rst
 qt4reactor.py
 setup.py
-./bin/gtrial
 ghtTests/FDtest.py
 ghtTests/__init__.py
 ghtTests/buttonStress.py
