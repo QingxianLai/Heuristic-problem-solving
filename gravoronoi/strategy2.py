@@ -197,6 +197,7 @@ class Client(protocol.Protocol):
         return True
 
     def player1_move(self):
+        print self.my_moves, "1111111111111111111"
         if self.my_moves == []:
             return (499, 499)
         else:
@@ -224,7 +225,7 @@ class Client(protocol.Protocol):
                 player, x, y = parts[0], int(parts[1]), int(parts[2])
                 # make a random move
                 self.prev_moves.append((x, y))
-            move = self.make_random_move()
+            move = self.player2_move()
             self.my_moves.append(move)
             print "making move %r" % str(move)
             self.transport.write("{0} {1}".format(move[0], move[1]))
