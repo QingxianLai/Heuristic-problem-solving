@@ -263,7 +263,7 @@ class ClientFactory(protocol.ClientFactory):
 
 def main():
     num_moves = 10
-    if len(sys.argv) <= 2:
+    if len(sys.argv) < 2:
         print "provide arg for client name"
         sys.exit()
     if len(sys.argv) == 3:
