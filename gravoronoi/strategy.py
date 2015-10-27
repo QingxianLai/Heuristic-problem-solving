@@ -8,10 +8,11 @@ from twisted.internet import reactor, protocol
 board_size = 1000
 
 class Client(protocol.Protocol):
-    def __init__(self, name):
+    def __init__(self, name, num_moves):
         self.name = name
         self.prev_moves = []
         self.my_moves = []
+        self.num_moves = num_moves
 
     def calculate_distance(self):
         opponent = 0
@@ -89,8 +90,10 @@ class Client(protocol.Protocol):
             new_y = last_move[1]+5
         else:
             new_y = last_move[1]-5
-        return (new_x, new_y)
-
+        if self._verify_posi(new_x, new_y):
+            return (new_x, new_y)
+        else:
+            return self._find_edge_pos((new_x, new_y))
 
     def _go_pos_move(self, last_move):
         """docstring for _go_pos_move"""
@@ -201,7 +204,10 @@ class Client(protocol.Protocol):
             return (499, 499)
         else:
             last_move = self.prev_moves[-1];
-            next_move = self._go_pos_move(last_move)
+            if self.num_moves > 6:
+                next_move = self._go_pos_move(last_move)
+            else:
+                next_move = self._opposite_move(last_move)
             return next_move
 
 
@@ -209,8 +215,10 @@ class Client(protocol.Protocol):
         """docstring for player2_move"""
         # time.sleep(2)
         last_move = self.prev_moves[-1];
-        next_move = self._go_pos_move(last_move)
-        # next_move = self._opposite_move(last_move)
+        if self.num_moves > 6:
+            next_move = self._go_pos_move(last_move)
+        else:
+            next_move = self._opposite_move(last_move)
         return next_move
 
     def dataReceived(self, data):
@@ -237,11 +245,12 @@ class Client(protocol.Protocol):
 
 class ClientFactory(protocol.ClientFactory):
     """ClientFactory"""
-    def __init__(self, name):
+    def __init__(self, name, num_moves):
         self.name = name
+        self.num_moves = num_moves
 
     def buildProtocol(self, addr):
-        c = Client(self.name)
+        c = Client(self.name, self.num_moves)
         c.addr = addr
         return c
 
@@ -253,11 +262,14 @@ class ClientFactory(protocol.ClientFactory):
         print "Connection lost - goodbye!"
 
 def main():
-    if len(sys.argv) != 2:
+    num_moves = 10
+    if len(sys.argv) <= 2:
         print "provide arg for client name"
         sys.exit()
+    if len(sys.argv) == 3:
+        num_moves = int(sys.argv[2])
     client_name = sys.argv[1]
-    factory = ClientFactory(client_name)
+    factory = ClientFactory(client_name, num_moves)
     reactor.connectTCP("127.0.0.1", 1337, factory)
     reactor.run()
 
