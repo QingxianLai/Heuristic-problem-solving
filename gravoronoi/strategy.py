@@ -123,14 +123,14 @@ class Client(protocol.Protocol):
         new_x = 0
         new_y = 0
         if last_move[0] < board_size/2:
-            new_x = last_move[0]-15
+            new_x = last_move[0]+5
         else:
-            new_x = last_move[0]+15
+            new_x = last_move[0]-5
 
         if last_move[1] < board_size/2:
-            new_y = last_move[1]-15
+            new_y = last_move[1]+5
         else:
-            new_y = last_move[1]+15
+            new_y = last_move[1]-5
         return (new_x, new_y)
 
 
@@ -243,6 +243,7 @@ class Client(protocol.Protocol):
         # time.sleep(2)
         last_move = self.prev_moves[-1];
         next_move = self._go_pos_move(last_move)
+        # next_move = self._opposite_move(last_move)
         return next_move
 
     def dataReceived(self, data):
