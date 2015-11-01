@@ -2,14 +2,6 @@ import websocket
 import sys
 import json
 
-class GameStrategy(object):
-    def __init__(self, role, ws):
-        """docstring for __init__"""
-        self.role = role
-        self.ws = ws
-
-    def _send_to_server(self, json_command):
-
 
 def main():
     """docstring for main"""

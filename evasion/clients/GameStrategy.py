@@ -2,6 +2,7 @@ import websocket
 import sys
 import json
 
+
 class GameStrategy(object):
     def __init__(self, role, ws):
         """docstring for __init__"""
@@ -13,7 +14,7 @@ class GameStrategy(object):
         json_string = json.dumps(command_dict)
         self.ws.send(json_string)
         return_msg = None
-        if command_dict['command'] == "P" or command_dict['command']=="W":
+        if command_dict['command'] == "P" or command_dict['command'] == "W":
             return_msg = self.ws.recv()
         return return_msg
 
@@ -48,4 +49,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
