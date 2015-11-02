@@ -48,18 +48,28 @@ class GameStrategy(object):
                 self.first_move = False
                 self.hunter_prev_move = hunter_pos
             else:
+                i = 0
                 while self.publisher.recv():
+                    if i == 0:
+                        print i
+                        i += 1
+                        continue
                     pos = self._get_position()
+                    print pos
                     hunter_pos = pos["hunter"]
                     prey_pos = pos["prey"]
+                    
                     hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
+                    print hunter_direction
                     if self._if_can_be_caught_change_direction(hunter_direction, hunter_pos, prey_pos) != None:
                         best_direction = self._if_can_be_caught_change_direction(hunter_direction, hunter_pos, prey_pos)
                     else:
                         best_direction = self._get_best_move_direction(hunter_direction, hunter_pos[0] - prey_pos[0], hunter_pos[1] - prey_pos[1])
+                        print "best direction:", best_direction
                     self._send_moving_message(best_direction)
                     self.first_move = False
                     self.hunter_prev_move = hunter_pos
+                    i = 0
 
     def _if_can_be_caught_change_direction(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "NW" or hunter_direction == "SE":
@@ -93,7 +103,7 @@ class GameStrategy(object):
                 best_move = 'NE'
             else:
                 best_move = "SW"
-        elif hunter_direction == 'SE':
+        else:
             if relative_x < 0 and relative_y < 0:
                 best_move = 'NW'
             else:
