@@ -1,5 +1,12 @@
 var server = require('websocket').server, http = require('http');
 
+var express = require('express'),
+app = express();
+app.set('view engine', 'html');
+app.use(express.static(__dirname));
+
+var webServer = app.listen(8080);
+
 var socket = new server({
     httpServer: http.createServer().listen(1990)
 });
@@ -15,7 +22,12 @@ var preySocket = new server({
 var connection1 = null;
 var connection2 = null;
 var connection3 = null;
+var MAX_WALLS = 5;
+var COOL_DOWN_TIME = 2;
 var time = 0;
+var timeSinceLastBuild = -100;
+var lastWallId = 0;
+var errorList = [];
 
 var Wall, isPointOnWall, isWallIntersecting, line_intersects, move, moveHunter, movePrey, startPoint, useCoords, useLines, wall1, wall2;
 var RotationDirection, buildWallCoolingDown, canDeleteWall, cardinalDirections, compareToPoint, getCardinalDirection, hasHunterWon, isSquished, isWallIntersectingHunter, isWallIntersectingPrey, numWallsIsMaxed, willWallCauseSquishing, isValidWall;
@@ -30,6 +42,36 @@ Wall = (function() {
     return Wall;
 
   })();
+
+
+var errorCodes = {
+      I_WALL: 0,
+      I_HUNT: 1,
+      I_PREY: 2,
+      SQUISH: 3,
+      WAIT_TIME: 4,
+      TOO_MANY_WALLS: 5,
+      DELETE_FAILED: 6
+  };
+var errorCodesMessages = ["This wall intersects another wall",
+                  "This wall intersects the hunter",
+                  "This wall intersects the prey",
+                  "This wall causes squishing",
+                  "Not enough time has elapsed since last build",
+                  "You've built too many walls brother. Time to start thinking about tearing them down.",
+		  "These wall ids do not exist."
+                  ];
+
+EvasionError = (function() {
+  function EvasionError(message, code, data) {
+    this.message = message;
+    this.code = code;
+    this.reason = errorCodesMessages[code];
+    this.data = data;
+  }
+
+  return EvasionError;
+})();
 
 
 var cardinalDirections = {
@@ -51,21 +93,16 @@ var topWall = new Wall([0, -1], 300, cardinalDirections.E);
 var bottomWall = new Wall([0, 301], 300, cardinalDirections.E);
 var globalWalls = [leftWall, rightWall, topWall, bottomWall];
 
+var connectionArray = [];
 
+function publish (data) {
+  for (var i = 0; i < connectionArray.length; i++) {
+    connectionArray[i].send(data);
+  }
+}
 
 socket.on('request', function(request) {
-    connection1 = request.accept(null, request.origin);
-
-    connection1.on('message', function(message) {
-        console.log("main socket");
-    });
-
-    connection1.on('close', function(connection) {
-        console.log('connection closed');
-        time = 0;
-        hunterMoves = [];
-        preysMoves = [];
-    });
+    connectionArray.push(request.accept(null, request.origin));
 });
 
 hunterSocket.on('request', function(request) {
@@ -73,7 +110,7 @@ hunterSocket.on('request', function(request) {
     connection2.on('message', function(message) {
         //{command:'P'}
         //{command:'W'}
-        console.log(message);
+        //console.log(message);
         var data = JSON.parse(message.utf8Data);
         if (data.command == "P" || data.command == 'W') {
             process(data,connection2);
@@ -104,6 +141,22 @@ var hunterPos = [0,0];
 var preyPos = [230,200];
 var hunterDir = cardinalDirections.SE;
 
+function stringFromValue(val){
+  for(k in cardinalDirections){
+    if(cardinalDirections[k] === val)
+      return k;
+  }
+  return val;
+}
+
+function properWallOutput(walls){
+  var clone = JSON.parse(JSON.stringify(walls));
+  for(var i = 0; i < clone.length; i++){
+    clone[i].direction = stringFromValue(clone[i].direction);
+  }
+  return clone;
+}
+
 function process(data, connection) {
     console.log("process");
     if (data.command == 'P') {
@@ -117,7 +170,7 @@ function process(data, connection) {
         connection.send(JSON.stringify(
                             {
                                 command: data.command,
-                                walls: walls
+                                walls: properWallOutput(walls)
                             }));
     }
 }
@@ -125,6 +178,7 @@ function getProperDirection(direction){
   return cardinalDirections[direction];
 }
 
+var failDels = [];
 function processHunter(data) {
         //{command:'B',wall: { length:<int>,direction:<cardinalDirections enum> }
         //{command:'D',wallIndex:<int>}
@@ -140,22 +194,33 @@ function processHunter(data) {
         // data.wall.position = move(hunterPos,properDirection);
         var parsedWall = {};
         parsedWall.length = data.wall.length;
-        parsedWall.position = move(hunterPos,properDirection);
+        parsedWall.position = hunterPos;
         parsedWall.direction = properDirection;
+
         //console.log("POSITION: " + data.wall.position);
-        var valid =  isValidWall(parsedWall, walls.concat(globalWalls), hunterPos, hunterDir, preyPos);
+        var valid = isValidWall(parsedWall, walls.concat(globalWalls), hunterPos, hunterDir, preyPos, data);
         if (valid) {
+          var error;
+          if(buildWallCoolingDown(time, timeSinceLastBuild, COOL_DOWN_TIME)) {
+            error = new EvasionError("Wall could not be built.", errorCodes.WAIT_TIME, data);
+            errorList.push(error);
+          } else if(numWallsIsMaxed(MAX_WALLS,walls)){
+            error = new EvasionError("Wall could not be built.", errorCodes.TOO_MANY_WALLS, data);
+            errorList.push(error);
+          } else {
+	    parsedWall.id = lastWallId;
             walls.push(parsedWall);
+            timeSinceLastBuild = time;
+	    lastWallId++;
+          }
         }
         validCommand = true;
     }
     else if (data.command == 'D') {
-        // check if valid deletion
-        var valid = canDeleteWall(data.wallIndex,walls);
-        //console.log("LOOK HERE" + valid);
-        if (valid) {
-            walls.splice(data.wallIndex);
-        }
+	failDels = [];
+	data.wallIds.forEach(deleteWallsById);
+        var error = new EvasionError("Walls " + failDels + " do not exist", errorCodes.DELETE_FAILED, data);
+	errorList.push(error);
         validCommand = true;
     }
     else if (data.command == 'M') {
@@ -166,6 +231,25 @@ function processHunter(data) {
         hunterPos = hunter.newPosition;
         hunterDir = hunter.direction;
     }
+}
+
+
+function deleteWallsById(currentValue) {
+	var found = false;
+	for (var i = 0; i < walls.length; i++) {
+		if (wallEquals(currentValue,walls[i])) {
+			walls.splice(i,1);
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		failDels.push(currentValue);
+	}
+}
+
+function wallEquals(id, wall) {
+	return id == wall.id;
 }
 
 function processPrey(data) {
@@ -199,6 +283,7 @@ function sendMove(nextMove) {
     }
     //moves.push(nextMove);
     //console.log(moves);
+    var broadcast;
     if (time%2 == 0) {
         //console.log("Even Time: " + time);
         if (hMoves.length != 0) {
@@ -206,18 +291,12 @@ function sendMove(nextMove) {
             hMoves.splice(0,1);
             hNextMove.fun(hNextMove.data);
             time++;
-             connection1.send(JSON.stringify({
-                        hunter: hunterPos,
-                        prey: preyPos,
-                        wall: walls,
-                        time: time,
-                        gameover: hasHunterWon(hunterPos, preyPos, walls)
-
-                    }));
+            broadcast = broadcastJson();
+            publish(broadcast);
         }
     }
     else if (time%2 == 1) {
-        //console.log("Odd Time: " + time);   
+        //console.log("Odd Time: " + time);
         if (hMoves.length != 0 && pMoves.length != 0) {
             hNextMove = hMoves[0];
             pNextMove = pMoves[0];
@@ -226,19 +305,22 @@ function sendMove(nextMove) {
             hMoves.splice(0,1);
             pMoves.splice(0,1);
             time++;
-            //console.log("LOOK HERE: " + preyPos);
-             connection1.send(JSON.stringify({
-                        hunter: hunterPos,
-                        prey: preyPos,
-                        wall: walls,
-                        time: time,
-                        gameover: hasHunterWon(hunterPos, preyPos, walls)
-                    }));
+            broadcast = broadcastJson();
+            publish(broadcast);
         }
     }
-        //console.log(moves);
+}
 
-
+function broadcastJson(){
+  var json = {};
+  json.hunter = hunterPos;
+  json.prey = preyPos;
+  json.walls = properWallOutput(walls);
+  json.time = time;
+  json.gameover = hasHunterWon(hunterPos, preyPos, walls);
+  json.errors = errorList;
+  errorList = [];
+  return JSON.stringify(json);
 }
 
 
@@ -285,16 +367,25 @@ moveHunter = function(p, cardinalDirection, walls, depth, original1, original2) 
   if (original2 == null) {
     original2 = 0;
   }
-  newPosition = move(p, cardinalDirection);
   returnVal = {
     newPosition: p,
     direction: cardinalDirection
   };
+  if(cardinalDirection == null){
+    newDir = [original1 * -1, original2 * -1];
+    newDir = getCardinalDirection(newDir);
+    returnVal.direction = newDir;
+    return returnVal;
+  }
+
+  newPosition = move(p, cardinalDirection);
+
   if (depth === 0) {
-    return {
+    returnVal = {
       newPosition: p,
       direction: cardinalDirection
     };
+    return returnVal;
   }
   for (i = 0, len = walls.length; i < len; i++) {
     w = walls[i];
@@ -303,14 +394,14 @@ moveHunter = function(p, cardinalDirection, walls, depth, original1, original2) 
         if (cardinalDirection === cardinalDirections.E || cardinalDirection === cardinalDirections.W) {
           return moveHunter(p, getCardinalDirection([cardinalDirection[0] * -1, 0]), walls, depth - 1, cardinalDirection[0], original2 );
         } else  {
-          return moveHunter(p, getCardinalDirection([cardinalDirection[0], cardinalDirection[1] * -1]), walls, depth - 1, original1, cardinalDirection[1]);
+          return moveHunter(p, getCardinalDirection([cardinalDirection[0], 0]), walls, depth - 1, original1, cardinalDirection[1]);
         }
       }
       if (w.direction === cardinalDirections.N || w.direction === cardinalDirections.S) {
         if (cardinalDirection === cardinalDirections.N || cardinalDirection === cardinalDirections.S) {
           return moveHunter(p, getCardinalDirection([0, cardinalDirection[1] * -1]), walls, depth - 1, original1 , cardinalDirection[1]);
         } else {
-          return moveHunter(p, getCardinalDirection([cardinalDirection[0] *-1, cardinalDirection[1]]), walls, depth - 1, cardinalDirection[0], original2 );
+          return moveHunter(p, getCardinalDirection([0, cardinalDirection[1]]), walls, depth - 1, cardinalDirection[0], original2 );
         }
       }
     } else {
@@ -351,7 +442,7 @@ function RotationDirection(p1x, p1y, p2x, p2y, p3x, p3y) {
     return 1;
   else if (((p3y - p1y) * (p2x - p1x)) == ((p2y - p1y) * (p3x - p1x)))
     return 0;
-  
+
   return -1;
 }
 
@@ -364,10 +455,10 @@ line_intersects = function(x1, y1, x2, y2, x3, y3, x4, y4) {
   var face3CounterClockwise = RotationDirection(x1, y1, x3, y3, x4, y4);
   var face4CounterClockwise = RotationDirection(x2, y2, x3, y3, x4, y4);
 
-  // If face 1 and face 2 rotate different directions and face 3 and face 4 rotate different directions, 
+  // If face 1 and face 2 rotate different directions and face 3 and face 4 rotate different directions,
   // then the lines intersect.
   var intersect = face1CounterClockwise != face2CounterClockwise && face3CounterClockwise != face4CounterClockwise;
-  
+
   // If lines are on top of each other.
   if (face1CounterClockwise == 0 && face2CounterClockwise == 0 && face3CounterClockwise == 0 && face4CounterClockwise == 0){
     intersect = true;}
@@ -421,7 +512,11 @@ isWallIntersecting = function(newWall, walls) {
 };
 
 isWallIntersectingHunter = function(newWall, hunterPosition) {
-  return isPointOnWall(hunterPosition,newWall);
+  var wall = {};
+  wall.length = newWall.length;
+  wall.position = move(hunterPosition, newWall.direction);
+  wall.direction = newWall.direction;
+  return isPointOnWall(hunterPosition,wall);
 };
 
 isWallIntersectingPrey = function(newWall, preyPosition) {
@@ -429,13 +524,24 @@ isWallIntersectingPrey = function(newWall, preyPosition) {
 };
 
 isSquished = function(hunterPos, hunterDir, walls) {
-  var newPos;
+  var newPos, newerPos, evenNewerPos;
+
   newPos = moveHunter(hunterPos, hunterDir, walls);
-  return newPos.cardinalDirection === cardinalDirections.E || newPos.cardinalDirection === cardinalDirections.W || newPos.cardinalDirection === cardinalDirections.N || newPos.cardinalDirection === cardinalDirections.S;
+  newerPos = moveHunter(newPos.newPosition, newPos.direction, walls);
+  evenNewerPos = moveHunter(newerPos.newPosition, newerPos.direction, walls);
+  if(newPos.newPosition[0] == newerPos.newPosition[0] &&
+     newPos.newPosition[1] == newerPos.newPosition[1] &&
+     evenNewerPos.newPosition[0] == newerPos.newPosition[0] &&
+     evenNewerPos.newPosition[1] == newerPos.newPosition[1]  )
+    return true;
+  return false;
 };
 
 willWallCauseSquishing = function(newWall, walls, hunterPosition, hunterDir) {
-  return isSquished(hunterPosition, hunterDir, walls.concat(newWall));
+  var newPosWOWall, ret;
+  newPosWOWall = moveHunter(hunterPosition, hunterDir, walls);
+  ret = isPointOnWall(newPosWOWall.newPosition,newWall);
+  return ret || isSquished(hunterPosition, hunterDir, walls.concat(newWall));
 };
 
 hasHunterWon = function(hunterPos, preyPos, walls) {
@@ -457,9 +563,6 @@ hasHunterWon = function(hunterPos, preyPos, walls) {
   return closeEnough;
 };
 
-canDeleteWall = function(index, walls) {
-  return index >= 0 && index < walls.length;
-};
 
 numWallsIsMaxed = function(num, walls) {
   return num === walls.length;
@@ -469,21 +572,56 @@ buildWallCoolingDown = function(timenow, timesincelast, waittime) {
   return timenow - timesincelast < waittime;
 };
 
-isValidWall = function(newWall, walls, hunterPos, hunterDir, preyPos) {
+isValidWall = function(newWall, walls, hunterPos, hunterDir, preyPos, data) {
+  if(data == null){
+    data = "";
+  }
+  var error;
   var intersecthunter, intersectprey, intersectwall, squishing;
   intersectwall = isWallIntersecting(newWall, walls);
-   // console.log("MAYBE1: " + intersectwall);
+  if(intersectwall){
+    error = new EvasionError("Wall could not be built", errorCodes.I_WALL, data);
+    errorList.push(error);
+  }
   intersecthunter = isWallIntersectingHunter(newWall, hunterPos);
-   //     console.log("MAYBE2: " + intersecthunter);
-
+  if(intersecthunter){
+    error = new EvasionError("Wall could not be built", errorCodes.I_HUNT, data);
+    errorList.push(error);
+  }
   intersectprey = isWallIntersectingPrey(newWall, preyPos);
-  //      console.log("MAYBE3: " + intersectprey);
-
+  if(intersectprey){
+    error = new EvasionError("Wall could not be built", errorCodes.I_PREY, data);
+    errorList.push(error);
+  }
   squishing = willWallCauseSquishing(newWall, walls, hunterPos, hunterDir);
-   //       console.log("MAYBE4: " + squishing);
-
+  if(squishing){
+    error = new EvasionError("Wall could not be built", errorCodes.SQUISH, data);
+    errorList.push(error);
+  }
     return !(intersectwall || intersecthunter || intersectprey || squishing);
 };
+
+/*
+processHunter({command:"B",wall:{length:2,direction:"S"}});
+console.log(walls);
+processHunter({command:"D",wallIds:[0]});
+console.log(failDels);
+console.log(walls);
+processHunter({command:"D",wallIds:[0]});
+console.log(failDels);
+buildFakeWalls(5, 10);
+processHunter({command:"D",wallIds:[2,4]});
+console.log(walls);
+buildFakeWalls(2, 60);
+console.log(walls);
+
+function buildFakeWalls(numWalls, seed) {
+	for (var i = 0; i <= numWalls; i++) {
+		hunterPos = [seed*i,seed*i];
+		time = seed*i;
+		processHunter({command:"B",wall:{length:i,direction:"S"}});
+	}
+}*/
 
 /*processHunter({command:'B',wall: { position:[2,2], length:2, direction:cardinalDirections.S } });
 console.log(walls);
