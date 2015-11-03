@@ -34,8 +34,11 @@ class GameStrategy(object):
                 self.first_move = False
             else:
                 status = self.publisher.recv()
+                
                 # print "receive : %s" % status
                 status = json.loads(status)
+                # if status["gameover"]:
+                    # break
                 hunter_pos = status["hunter"]
                 prey_pos = status["prey"]
                 walls = status["walls"]
@@ -48,7 +51,8 @@ class GameStrategy(object):
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
 
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
-                    # print time, wall_check
+                    print time, wall_check
+                    print status
                     self._build_entire_wall(wall_check[1])
                     self.last_wall_time = time
                 else:
@@ -144,24 +148,24 @@ class GameStrategy(object):
 
     def _time_to_build_wall(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "SE":
-            if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
+            if prey_pos[1] - hunter_pos[1] < 2 and prey_pos[1] - hunter_pos[1] > 0:
                 return (True, "H")
-            elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
+            elif prey_pos[0] - hunter_pos[0] < 2 and prey_pos[0] - hunter_pos[0] > 0:
                 return (True, "V")
         elif hunter_direction == "NW":
-            if hunter_pos[1] - prey_pos[1] < 4 and hunter_pos[1] - prey_pos[1] > 0:
+            if hunter_pos[1] - prey_pos[1] < 2 and hunter_pos[1] - prey_pos[1] > 0:
                 return (True, "H")
-            elif hunter_pos[0] - prey_pos[0] < 4 and hunter_pos[0] - prey_pos[0] > 0:
+            elif hunter_pos[0] - prey_pos[0] < 2 and hunter_pos[0] - prey_pos[0] > 0:
                 return (True, "V")
         elif hunter_direction == "NE":
-            if hunter_pos[1] - prey_pos[1] < 4 and hunter_pos[1] - prey_pos[1] > 0:
+            if hunter_pos[1] - prey_pos[1] < 2 and hunter_pos[1] - prey_pos[1] > 0:
                 return (True, "H")
-            elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
+            elif prey_pos[0] - hunter_pos[0] < 2 and prey_pos[0] - hunter_pos[0] > 0:
                 return (True, "V")
         else:
-            if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
+            if prey_pos[1] - hunter_pos[1] < 2 and prey_pos[1] - hunter_pos[1] > 0:
                 return (True, "H")
-            elif hunter_pos[0] - prey_pos[0] < 4 and hunter_pos[0] - prey_pos[0] > 0:
+            elif hunter_pos[0] - prey_pos[0] < 2 and hunter_pos[0] - prey_pos[0] > 0:
                 return (True, "V")
         return (False, "")
 
