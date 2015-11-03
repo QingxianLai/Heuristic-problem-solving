@@ -4,7 +4,7 @@ import json
 import math
 
 class GameStrategy(object):
-    def __init__(self, role, ws, publisher):
+    def __init__(self, role, ws, publisher, wall_limit, build_frequency):
         """docstring for __init__"""
         self.role = role
         self.ws = ws
@@ -12,6 +12,9 @@ class GameStrategy(object):
         self.first_move = True
         self.hunter_prev_move = (0, 0)
         self.prey_prev_move = (230, 200)
+        self.last_wall_time = -1
+        self.max_num_wall = wall_limit
+        self.build_frequency = build_frequency
 
     def _send_to_server(self, command_dict):
         """docstring for _send_to_server"""
@@ -29,10 +32,47 @@ class GameStrategy(object):
                 self._send_to_server({"command": "M"})
                 self.first_move = False
             else:
-                while self.publisher.recv():
-                    self._send_moving_message()
-                    a = self._get_position()
-                    print a
+                status = self.publisher.recv()
+                status = json.loads(status)
+                hunter_pos = status["hunter"]
+                prey_pos = status["prey"]
+                walls = status["wall"]
+                time = status["time"]
+                hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
+                self._remove_walls(walls, hunter_pos)
+                wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
+                if time - self.last_wall_time > self.build_frequency and wall_check[0]:
+                    self._build_entire_wall(wall_check[1])
+                self.hunter_prev_move = hunter_pos
+                self._send_moving_message()
+
+    def _remove_walls(self, walls, hunter_pos):
+        """docstring for _remove_walls"""
+        NS_dist = 500
+        NS_closest_id = -1
+        EW_dist = 500
+        EW_closest_id = -1
+        remove_ids = []
+        for wall in walls:
+            if wall["direction"] == [0, 1] or wall["direction"] == [0, -1]:
+                hunter_dist = abs(wall["position"][0] - hunter_pos[0])
+                if hunter_dist >= EW_dist:
+                    remove_ids.append(wall["id"])
+                else:
+                    EW_dist = hunter_dist
+                    if EW_closest_id != -1:
+                        remove_ids.append(EW_closest_id)
+                    EW_closest_id = wall["id"]
+            else:
+                hunter_dist = abs(wall["position"][1] - hunter_pos[1])
+                if hunter_dist >= NS_dist:
+                    remove_ids.append(wall["id"])
+                else:
+                    NS_dist = hunter_dist
+                    if NS_closest_id != -1:
+                        remove_ids.append(NS_closest_id)
+                    NS_closest_id = wall["id"]
+        self._delete_walls(remove_ids)
 
     def prey_strategy(self):
         """docstring for preyStrategy"""
@@ -137,7 +177,7 @@ class GameStrategy(object):
             else:
                 best_move = 'SE'
         return best_move
-                    
+
     def _get_direction(self, pos1, pos2):
         if pos1[0] == pos2[0] and pos1[1] < pos2[1]:
             return "S"
@@ -170,7 +210,7 @@ class GameStrategy(object):
     def _delete_walls(self, wall_ids):
         message = {"command": "D", "wallsIds": wall_ids}
         self._send_to_server(message)
-    
+
     def _get_walls(self):
         message = {"command": "W"}
         json_string = self._send_to_server(message)
@@ -205,7 +245,14 @@ def main():
         port = "1992"
         url = "ws://localhost:" + port
         ws = websocket.create_connection(url)
-    strategy = GameStrategy(role, ws, publisher)
+    M = 5 # max number of wall for hunter
+    N = 5 # wall building frequency limit
+
+    if len(sys.argv) > 2:
+        M = sys.argv[2]
+        N = sys.argv[3]
+
+    strategy = GameStrategy(role, ws, publisher, M, N)
     strategy.run()
 
 if __name__ == '__main__':
