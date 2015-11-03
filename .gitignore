@@ -8,3 +8,5 @@
 **/.idea
 *.pyc
 *.swp
+evasion/evasion-ui/bower_components
+evasion/evasion-ui/node_modules
