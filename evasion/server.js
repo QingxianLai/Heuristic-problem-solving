@@ -186,8 +186,10 @@ function processHunter(data) {
     console.log("processHunter");
     var validCommand = false;
     var properDirection = cardinalDirections.N;
+
     if (data.command == 'B') {
         // check if valid wall, right length, allowed to build wall (number and time)
+        
         properDirection = getProperDirection(data.wall.direction);
         //console.log(properDirection);
         //console.log(properDirection);
@@ -197,6 +199,8 @@ function processHunter(data) {
         parsedWall.position = hunterPos;
         parsedWall.direction = properDirection;
 
+
+        console.log(JSON.stringify(parsedWall));
         //console.log("POSITION: " + data.wall.position);
         var valid = isValidWall(parsedWall, walls.concat(globalWalls), hunterPos, hunterDir, preyPos, data);
         if (valid) {
