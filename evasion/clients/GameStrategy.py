@@ -91,21 +91,16 @@ class GameStrategy(object):
                 i = 0
                 while self.publisher.recv():
                     if i == 0:
-                        print i
                         i += 1
                         continue
                     pos = self._get_position()
-                    print pos
                     hunter_pos = pos["hunter"]
                     prey_pos = pos["prey"]
-
                     hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
-                    print hunter_direction
                     if self._if_can_be_caught_change_direction(hunter_direction, hunter_pos, prey_pos) != None:
                         best_direction = self._if_can_be_caught_change_direction(hunter_direction, hunter_pos, prey_pos)
                     else:
                         best_direction = self._get_best_move_direction(hunter_direction, hunter_pos[0] - prey_pos[0], hunter_pos[1] - prey_pos[1])
-                        print "best direction:", best_direction
                     self._send_moving_message(best_direction)
                     self.first_move = False
                     self.hunter_prev_move = hunter_pos
@@ -113,12 +108,26 @@ class GameStrategy(object):
 
     def _time_to_build_wall(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "SE":
-            if prey_pos[1] - hunter_pos[1] < 4:
-                return (True, "N")
+            if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
+                return (True, "H")
+            elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
+                return (True, "V")
         elif hunter_direction == "NW":
-            if hunter_pos[1] - prey_pos[1] < 4:
-                return True
-
+            if hunter_pos[1] - prey_pos[1] < 4 and hunter_pos[1] - prey_pos[1] > 0:
+                return (True, "H")
+            elif hunter_pos[0] - prey_pos[0] < 4 and hunter_pos[0] - prey_pos[0] > 0:
+                return (True, "V")
+        elif hunter_direction == "NE":
+            if hunter_pos[1] - prey_pos[1] < 4 and hunter_pos[1] - prey_pos[1] > 0:
+                return (True, "H")
+            elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
+                return (True, "V")
+        else:
+            if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
+                return (True, "H")
+            elif hunter_pos[0] - prey_pos[0] < 4 and hunter_pos[0] - prey_pos[0] > 0:
+                return (True, "V")
+        return (False, "")
 
     def _if_can_be_caught_change_direction(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "NW" or hunter_direction == "SE":
@@ -195,7 +204,7 @@ class GameStrategy(object):
         self._send_to_server(message)
 
     def _build_entire_wall(self, direction):
-        message = {"command": "BD", "direction": direction}
+        message = {"command": "B", "direction": direction}
         self._send_to_server(message)
 
     def _delete_walls(self, wall_ids):
