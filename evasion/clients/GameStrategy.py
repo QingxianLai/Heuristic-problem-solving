@@ -33,17 +33,19 @@ class GameStrategy(object):
                 self.first_move = False
             else:
                 status = self.publisher.recv()
+                print "receive : %s" % status
                 status = json.loads(status)
                 hunter_pos = status["hunter"]
                 prey_pos = status["prey"]
                 walls = status["walls"]
                 time = status["time"]
                 hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
-                self._remove_walls(walls, hunter_pos)
+                # self._remove_walls(walls, hunter_pos)
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
+
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
                     self._build_entire_wall(wall_check[1])
-                    time = self.last_wall_time
+                    self.last_wall_time = time
                 self.hunter_prev_move = hunter_pos
                 self._send_moving_message()
                 sleep(0.1)
@@ -74,7 +76,7 @@ class GameStrategy(object):
                     if NS_closest_id != -1:
                         remove_ids.append(NS_closest_id)
                     NS_closest_id = wall["id"]
-        if len(remove_ids) > 0:
+        if len(remove_ids) >0:
             self._delete_walls(remove_ids)
 
     def prey_strategy(self):
@@ -113,7 +115,7 @@ class GameStrategy(object):
     def _time_to_build_wall(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "SE":
             if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
-                return (True, "H")
+                return (True, "E")
             elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
                 return (True, "V")
         elif hunter_direction == "NW":
