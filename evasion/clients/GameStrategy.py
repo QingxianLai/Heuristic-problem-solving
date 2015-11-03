@@ -2,7 +2,7 @@ import websocket
 import sys
 import json
 import math
-
+from time import sleep
 class GameStrategy(object):
     def __init__(self, role, ws, publisher, wall_limit, build_frequency):
         """docstring for __init__"""
@@ -36,15 +36,17 @@ class GameStrategy(object):
                 status = json.loads(status)
                 hunter_pos = status["hunter"]
                 prey_pos = status["prey"]
-                walls = status["wall"]
+                walls = status["walls"]
                 time = status["time"]
                 hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
                 self._remove_walls(walls, hunter_pos)
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
                     self._build_entire_wall(wall_check[1])
+                    time = self.last_wall_time
                 self.hunter_prev_move = hunter_pos
                 self._send_moving_message()
+                sleep(0.1)
 
     def _remove_walls(self, walls, hunter_pos):
         """docstring for _remove_walls"""
@@ -72,7 +74,8 @@ class GameStrategy(object):
                     if NS_closest_id != -1:
                         remove_ids.append(NS_closest_id)
                     NS_closest_id = wall["id"]
-        self._delete_walls(remove_ids)
+        if len(remove_ids) > 0:
+            self._delete_walls(remove_ids)
 
     def prey_strategy(self):
         """docstring for preyStrategy"""
@@ -102,6 +105,7 @@ class GameStrategy(object):
                     else:
                         best_direction = self._get_best_move_direction(hunter_direction, hunter_pos[0] - prey_pos[0], hunter_pos[1] - prey_pos[1])
                     self._send_moving_message(best_direction)
+                    sleep(0.1)
                     self.first_move = False
                     self.hunter_prev_move = hunter_pos
                     i = 0
@@ -204,11 +208,11 @@ class GameStrategy(object):
         self._send_to_server(message)
 
     def _build_entire_wall(self, direction):
-        message = {"command": "B", "direction": direction}
+        message = {"command": "B", "wall": {"direction": direction}}
         self._send_to_server(message)
 
     def _delete_walls(self, wall_ids):
-        message = {"command": "D", "wallsIds": wall_ids}
+        message = {"command": "D", "wallIds": wall_ids}
         self._send_to_server(message)
 
     def _get_walls(self):
