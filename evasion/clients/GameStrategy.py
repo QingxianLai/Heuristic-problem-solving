@@ -138,7 +138,7 @@ class GameStrategy(object):
     def _if_can_be_caught_change_direction(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "NW" or hunter_direction == "SE":
             distance = abs(prey_pos[0] - prey_pos[1] + hunter_pos[1] - hunter_pos[0]) / math.sqrt(1 + 1)
-            if distance < 5 or abs(hunter_pos[1] - prey_pos[1]) < 5:
+            if distance < 5:
                 if - hunter_pos[1] + prey_pos[1] + hunter_pos[0] > prey_pos[1]:
                     return "SW"
                 else:
