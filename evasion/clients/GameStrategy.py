@@ -71,6 +71,16 @@ class GameStrategy(object):
                     self.hunter_prev_move = hunter_pos
                     i = 0
 
+    def _time_to_build_wall(self, hunter_direction, hunter_pos, prey_pos):
+        if hunter_direction == "SE":
+            if prey_pos[1] - hunter_pos[1] < 4:
+                return (True, "N")
+        elif hunter_direction == "NW":
+            if hunter_pos[1] - prey_pos[1] < 4:
+                return True
+
+
+
     def _if_can_be_caught_change_direction(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "NW" or hunter_direction == "SE":
             distance = abs(prey_pos[0] - prey_pos[1] + hunter_pos[1] - hunter_pos[0]) / math.sqrt(1 + 1)
@@ -145,7 +155,7 @@ class GameStrategy(object):
             message = {"command": "M", "direction": direction}
         self._send_to_server(message)
 
-    def _build_wall(self, direction):
+    def _build_entire_wall(self, direction):
         message = {"command": "BD", "direction": direction}
         self._send_to_server(message)
 
