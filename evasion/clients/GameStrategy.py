@@ -2,7 +2,8 @@ import websocket
 import sys
 import json
 import math
-from time import sleep
+
+
 class GameStrategy(object):
     def __init__(self, role, ws, publisher, wall_limit, build_frequency):
         """docstring for __init__"""
@@ -50,34 +51,57 @@ class GameStrategy(object):
                 else:
                     self.hunter_prev_move = hunter_pos
                     self._send_moving_message()
-                    self.num += 1
 
     def _remove_walls(self, walls, hunter_pos):
         """docstring for _remove_walls"""
-        NS_dist = 500
-        NS_closest_id = -1
-        EW_dist = 500
-        EW_closest_id = -1
+
+        u_dist = 500
+        u_id = -1
+        d_dist = 500
+        d_id = -1
+        l_dist = 500
+        l_id = -1
+        r_dist = 500
+        r_id = -1
+
         remove_ids = []
         for wall in walls:
             if wall["direction"] == [0, 1] or wall["direction"] == [0, -1]:
-                hunter_dist = abs(wall["position"][0] - hunter_pos[0])
-                if hunter_dist >= EW_dist:
-                    remove_ids.append(wall["id"])
+                hunter_dist = wall["position"][0] - hunter_pos[0]
+                if hunter_dist < 0:
+                    if -hunter_dist >= u_dist:
+                        remove_ids.append(wall["id"])
+                    else:
+                        u_dist = -hunter_dist
+                        if u_id != -1:
+                            remove_ids.append(u_id)
+                        u_id = wall["id"]
                 else:
-                    EW_dist = hunter_dist
-                    if EW_closest_id != -1:
-                        remove_ids.append(EW_closest_id)
-                    EW_closest_id = wall["id"]
+                    if hunter_dist >= d_dist:
+                        remove_ids.append(wall["id"])
+                    else:
+                        if d_id != -1:
+                            remove_ids.append(d_id)
+                        d_dist = hunter_dist
+                        d_id = wall["id"]
             else:
-                hunter_dist = abs(wall["position"][1] - hunter_pos[1])
-                if hunter_dist >= NS_dist:
-                    remove_ids.append(wall["id"])
+                hunter_dist = wall["position"][1] - hunter_pos[1]
+                if hunter_dist<0:
+                    if -hunter_dist >= l_dist:
+                        remove_ids.append(wall["id"])
+                    else:
+                        if l_id != -1:
+                            remove_ids.append(l_id)
+                        l_dist = -hunter_dist
+                        l_id = wall["id"]
                 else:
-                    NS_dist = hunter_dist
-                    if NS_closest_id != -1:
-                        remove_ids.append(NS_closest_id)
-                    NS_closest_id = wall["id"]
+                    if hunter_dist >= r_dist:
+                        remove_ids.append(wall["id"])
+                    else:
+                        if r_id != -1:
+                            remove_ids.append(r_id)
+                        r_dist = hunter_dist
+                        r_id = wall["id"]
         if len(remove_ids) >0:
             self._delete_walls(remove_ids)
 
