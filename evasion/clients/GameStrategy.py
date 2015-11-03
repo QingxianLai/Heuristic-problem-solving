@@ -2,7 +2,7 @@ import websocket
 import sys
 import json
 import math
-
+from time import sleep
 
 class GameStrategy(object):
     def __init__(self, role, ws, publisher, wall_limit, build_frequency):
@@ -41,7 +41,7 @@ class GameStrategy(object):
                 walls = status["walls"]
                 time = status["time"]
                 hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
-                # self._remove_walls(walls, hunter_pos)
+                self._remove_walls(walls, hunter_pos)
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
 
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
@@ -51,6 +51,7 @@ class GameStrategy(object):
                 else:
                     self.hunter_prev_move = hunter_pos
                     self._send_moving_message()
+                    sleep(0.1)
 
     def _remove_walls(self, walls, hunter_pos):
         """docstring for _remove_walls"""
