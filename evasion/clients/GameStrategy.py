@@ -74,18 +74,28 @@ class GameStrategy(object):
     def _if_can_be_caught_change_direction(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "NW" or hunter_direction == "SE":
             distance = abs(prey_pos[0] - prey_pos[1] + hunter_pos[1] - hunter_pos[0]) / math.sqrt(1 + 1)
-            if distance < 3:
+            if distance < 5 or abs(hunter_pos[1] - prey_pos[1]) < 5:
                 if - hunter_pos[1] + prey_pos[1] + hunter_pos[0] > prey_pos[1]:
                     return "SW"
                 else:
                     return "NE"
+            if abs(hunter_pos[0] - prey_pos[0]) < 5 or abs(hunter_pos[1] - prey_pos[1]) < 5:
+                if hunter_pos[0] < prey_pos[0]:
+                    return "E"
+                else:
+                    return "W"
         else:
             distance = abs(prey_pos[0] + prey_pos[1] - hunter_pos[1] - hunter_pos[0]) / math.sqrt(1 + 1)
-            if distance < 3:
+            if distance < 5:
                 if hunter_pos[1] - prey_pos[1] + hunter_pos[0] > prey_pos[1]:
                     return "NW"
                 else:
                     return "SE"
+            if abs(hunter_pos[0] - prey_pos[0]) < 5 or abs(hunter_pos[1] - prey_pos[1]) < 5:
+                if hunter_pos[0] < prey_pos[0]:
+                    return "S"
+                else:
+                    return "N"
 
     def _get_best_move_direction(self, hunter_direction, relative_x, relative_y):
         if hunter_direction == 'NW':
@@ -133,6 +143,14 @@ class GameStrategy(object):
             message = {"command": "M"}
         else:
             message = {"command": "M", "direction": direction}
+        self._send_to_server(message)
+
+    def _build_wall(self, direction):
+        message = {"command": "BD", "direction": direction}
+        self._send_to_server(message)
+
+    def _delete_walls(self, wall_ids):
+        message = {"command": "D", "wallsIds": wall_ids}
         self._send_to_server(message)
     
     def _get_walls(self):
