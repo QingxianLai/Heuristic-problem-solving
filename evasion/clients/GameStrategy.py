@@ -34,17 +34,17 @@ class GameStrategy(object):
                 self.first_move = False
             else:
                 status = self.publisher.recv()
-                
+
                 # print "receive : %s" % status
                 status = json.loads(status)
-                # if status["gameover"]:
-                    # break
+                if status["gameover"]:
+                    break
                 hunter_pos = status["hunter"]
                 prey_pos = status["prey"]
                 walls = status["walls"]
                 time = status["time"]
                 hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
-                remove_ids = self._remove_walls(walls, hunter_pos)
+                remove_ids = self._remove_walls(walls, hunter_pos, prey_pos)
                 if len(remove_ids) > 0:
                     self._delete_walls(remove_ids)
                     continue
@@ -60,7 +60,7 @@ class GameStrategy(object):
                     self._send_moving_message()
                     sleep(0.1)
 
-    def _remove_walls(self, walls, hunter_pos):
+    def _remove_walls(self, walls, hunter_pos, prey_pos):
         """docstring for _remove_walls"""
 
         u_dist = 500
@@ -75,6 +75,9 @@ class GameStrategy(object):
         remove_ids = []
         for wall in walls:
             if wall["direction"] == "S" or wall["direction"] == "N":
+                if (prey_pos[0] - wall["position"][0])*(hunter_pos[0] - wall["position"][0]) < 0:
+                    remove_ids.append(wall["id"])
+                    continue
                 hunter_dist = wall["position"][0] - hunter_pos[0]
                 if hunter_dist < 0:
                     if -hunter_dist >= u_dist:
@@ -93,6 +96,9 @@ class GameStrategy(object):
                         d_dist = hunter_dist
                         d_id = wall["id"]
             else:
+                if (prey_pos[1] - wall["position"][1])*(hunter_pos[1] - wall["position"][1]) < 0:
+                    remove_ids.append(wall["id"])
+                    continue
                 hunter_dist = wall["position"][1] - hunter_pos[1]
                 if hunter_dist<0:
                     if -hunter_dist >= l_dist:
