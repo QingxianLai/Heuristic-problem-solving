@@ -34,18 +34,21 @@ class GameStrategy(object):
                 self.first_move = False
             else:
                 status = self.publisher.recv()
-                print "receive : %s" % status
+                # print "receive : %s" % status
                 status = json.loads(status)
                 hunter_pos = status["hunter"]
                 prey_pos = status["prey"]
                 walls = status["walls"]
                 time = status["time"]
                 hunter_direction = self._get_direction(self.hunter_prev_move, hunter_pos)
-                self._remove_walls(walls, hunter_pos)
+                remove_ids = self._remove_walls(walls, hunter_pos)
+                if len(remove_ids) > 0:
+                    self._delete_walls(remove_ids)
+                    continue
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
 
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
-                    print time, wall_check
+                    # print time, wall_check
                     self._build_entire_wall(wall_check[1])
                     self.last_wall_time = time
                 else:
@@ -67,7 +70,7 @@ class GameStrategy(object):
 
         remove_ids = []
         for wall in walls:
-            if wall["direction"] == [0, 1] or wall["direction"] == [0, -1]:
+            if wall["direction"] == "S" or wall["direction"] == "N":
                 hunter_dist = wall["position"][0] - hunter_pos[0]
                 if hunter_dist < 0:
                     if -hunter_dist >= u_dist:
@@ -103,8 +106,9 @@ class GameStrategy(object):
                             remove_ids.append(r_id)
                         r_dist = hunter_dist
                         r_id = wall["id"]
-        if len(remove_ids) >0:
-            self._delete_walls(remove_ids)
+        # if len(remove_ids) >0:
+            # self._delete_walls(remove_ids)
+        return remove_ids
 
     def prey_strategy(self):
         """docstring for preyStrategy"""
