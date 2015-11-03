@@ -15,6 +15,7 @@ class GameStrategy(object):
         self.last_wall_time = -1
         self.max_num_wall = wall_limit
         self.build_frequency = build_frequency
+        self.num = 1
 
     def _send_to_server(self, command_dict):
         """docstring for _send_to_server"""
@@ -44,11 +45,14 @@ class GameStrategy(object):
                 wall_check = self._time_to_build_wall(hunter_direction, hunter_pos, prey_pos)
 
                 if time - self.last_wall_time > self.build_frequency and wall_check[0]:
+                    print time, wall_check
                     self._build_entire_wall(wall_check[1])
                     self.last_wall_time = time
-                self.hunter_prev_move = hunter_pos
-                self._send_moving_message()
-                sleep(0.1)
+                else:
+                    self.hunter_prev_move = hunter_pos
+                    self._send_moving_message()
+                    self.num += 1
+                    sleep(0.2)
 
     def _remove_walls(self, walls, hunter_pos):
         """docstring for _remove_walls"""
@@ -107,7 +111,7 @@ class GameStrategy(object):
                     else:
                         best_direction = self._get_best_move_direction(hunter_direction, hunter_pos[0] - prey_pos[0], hunter_pos[1] - prey_pos[1])
                     self._send_moving_message(best_direction)
-                    sleep(0.1)
+                    sleep(0.2)
                     self.first_move = False
                     self.hunter_prev_move = hunter_pos
                     i = 0
@@ -115,7 +119,7 @@ class GameStrategy(object):
     def _time_to_build_wall(self, hunter_direction, hunter_pos, prey_pos):
         if hunter_direction == "SE":
             if prey_pos[1] - hunter_pos[1] < 4 and prey_pos[1] - hunter_pos[1] > 0:
-                return (True, "E")
+                return (True, "H")
             elif prey_pos[0] - hunter_pos[0] < 4 and prey_pos[0] - hunter_pos[0] > 0:
                 return (True, "V")
         elif hunter_direction == "NW":
@@ -165,21 +169,29 @@ class GameStrategy(object):
         if hunter_direction == 'NW':
             if relative_x > 0 and relative_y > 0:
                 best_move = 'SE'
+            elif relative_x > 0:
+                best_move = "NE"
             else:
                 best_move = 'NW'
         elif hunter_direction == 'NE':
             if relative_x < 0 and relative_y > 0:
                 best_move = 'SW'
+            elif relative_x < 0:
+                best_move = "NW"
             else:
                 best_move = 'NE'
         elif hunter_direction == 'SW':
             if relative_x > 0 and relative_y < 0:
                 best_move = 'NE'
+            elif relative_x > 0:
+                best_move = "SE"
             else:
                 best_move = "SW"
         else:
             if relative_x < 0 and relative_y < 0:
                 best_move = 'NW'
+            elif relative_x < 0:
+                best_move = "SW"
             else:
                 best_move = 'SE'
         return best_move
@@ -251,7 +263,7 @@ def main():
         port = "1992"
         url = "ws://localhost:" + port
         ws = websocket.create_connection(url)
-    M = 5 # max number of wall for hunter
+    M = 10 # max number of wall for hunter
     N = 5 # wall building frequency limit
 
     if len(sys.argv) > 2:
