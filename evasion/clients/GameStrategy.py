@@ -15,7 +15,6 @@ class GameStrategy(object):
         self.last_wall_time = -1
         self.max_num_wall = wall_limit
         self.build_frequency = build_frequency
-        self.num = 1
 
     def _send_to_server(self, command_dict):
         """docstring for _send_to_server"""
@@ -52,7 +51,6 @@ class GameStrategy(object):
                     self.hunter_prev_move = hunter_pos
                     self._send_moving_message()
                     self.num += 1
-                    sleep(0.2)
 
     def _remove_walls(self, walls, hunter_pos):
         """docstring for _remove_walls"""
@@ -111,7 +109,6 @@ class GameStrategy(object):
                     else:
                         best_direction = self._get_best_move_direction(hunter_direction, hunter_pos[0] - prey_pos[0], hunter_pos[1] - prey_pos[1])
                     self._send_moving_message(best_direction)
-                    sleep(0.2)
                     self.first_move = False
                     self.hunter_prev_move = hunter_pos
                     i = 0
@@ -263,7 +260,7 @@ def main():
         port = "1992"
         url = "ws://localhost:" + port
         ws = websocket.create_connection(url)
-    M = 10 # max number of wall for hunter
+    M = 5 # max number of wall for hunter
     N = 5 # wall building frequency limit
 
     if len(sys.argv) > 2:
