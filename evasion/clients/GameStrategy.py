@@ -58,7 +58,7 @@ class GameStrategy(object):
                 else:
                     self.hunter_prev_move = hunter_pos
                     self._send_moving_message()
-                    sleep(0.1)
+                    # sleep(0.01)
 
     def _remove_walls(self, walls, hunter_pos, prey_pos):
         """docstring for _remove_walls"""
