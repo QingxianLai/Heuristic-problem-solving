@@ -18,7 +18,8 @@ public class Client {
     private static Map<Integer, Map<String, Integer>> freeNodes = new HashMap<Integer, Map<String, Integer>>();
     private static Map<Integer, Map<String, Integer>> oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
     private static int oppLiveNodes = 15;
-    
+    private static String oppo;
+
     public static void main(String[] args) {
         getDirectionPermutation(permutations, new LinkedList<String>(), new String[]{"up",
                 "down", "left", "right"}, new HashSet<String>());
@@ -27,14 +28,32 @@ public class Client {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String state;
-            out.println("REGISTER:" + args[0]);
+            out.println("REGISTER:" + "J");
             while ((state = in.readLine()) != null) {
                 if(state.equals("START")){
                     command = new StringBuffer();
                 }
                 else if(state.equals("END")){
                     if (!command.toString().replace("\n", "").equals("WAITING")) {
-                        out.println(process(command.toString()));
+
+                        StringBuilder commands = new StringBuilder();
+                        Map<Integer, List<String>> stopNodes = muncherStopper();
+                        if (stopNodes.size() > 0) {
+                            for (Integer key: stopNodes.keySet()) {
+                                commands.append(key);
+                                for (String direction: stopNodes.get(key)) {
+                                    commands.append("," + direction);
+                                }
+                                commands.append("|");
+                            }
+                            commands.append(process(command.toString()));
+                            //System.out.println(commands.toString());
+                            out.println(commands.toString());
+                        } else {
+
+                            out.println(process(command.toString()));
+                            //out.println("17,up,left,down,right");
+                        }
                     }
 
                 }else{
@@ -48,10 +67,13 @@ public class Client {
     }
 
     private static String process(String command){
-        Map<Integer, Map<String, Integer>> map = parseCommand(command);
+        //System.out.println(command);
+        freeNodes = new HashMap<Integer, Map<String, Integer>>();
+        oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
+        parseCommand(command);
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
         for (int i = 4; i >= 1; i--) {
-            res = getBestNodeAndPermutation(map, i);
+            res = getBestNodeAndPermutation(i);
             boolean find = false;
             for (Integer key: res.keySet()) {
                 if (key != -1) {
@@ -63,7 +85,9 @@ public class Client {
                 break;
             }
         }
+        System.out.println(res);
         Integer key = (Integer)res.keySet().toArray()[0];
+        //Starting point for your program
         StringBuilder node = new StringBuilder();
         node.append(key);
         for (String direction: res.get(key)) {
@@ -71,66 +95,20 @@ public class Client {
         }
         return  node.toString();
     }
-    
-    private static Map<Integer, List<String>> muncherStopper() {
-        Map<Integer, List<String>> stopNodes = new HashMap<Integer, List<String>>();
-        String[] dirs = {"up", "down", "left", "right"};
-        
-        // iterate every opponent's muncher
-        for (int node: oppOccupiedNodes.keySet()) {
-            
-            // each opponent muncher record the max stop score and number of availble ways.
-            int numWays = 0;
-            int maxScore = 0;
-            int maxNextM = 0;
-            List<String> maxNextMoves = null;
 
-            // iterate through every possible directions. 
-            for (String dir: dirs) {
+    private static void parseCommand(String command) {
 
-                // if the positin is free
-                if (oppOccupiedNodes.get(node).containsKey(dir) && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
-                    
-                    numWays++;
-                    int stopNode = oppOccupiedNodes.get(node).get(dir);
-                    
-                    // calculate the local maximum score among all the possible moves.
-                    int maxMoveScore = 0;
-                    List<String> maxMoves = null;
-                    for (List<String> moves: permutations) {
-                        int score = getScore(stopNode, moves);
-                        if (score > maxMoveScore) {
-                            maxMoveScore = score;
-                            maxMoves = moves;
-                        }
-                    }
-                    
-                    // update the max of the opponent's muncher
-                    if (maxMoveScore > maxScore) {
-                        maxScore = maxMoveScore;
-                        maxNextM = stopNode;
-                        maxNextMoves = maxMoves;
-                    } 
-                    
-                }
-            }
-
-            // if less equal than 2 available way out and the max Score greater then 2, add it to the stopNodes
-            if (numWays <= 2 && maxScore > 2) {
-                stopNodes.put(maxNextM, maxNextMoves);
-            }
-        }
-
-
-        return stopNodes;
-    }
-
-    private static Map<Integer, Map<String, Integer>> parseCommand(String command) {
-        Map<Integer, Map<String, Integer>> relation = new HashMap<Integer, Map<String, Integer>>();
         String[] states = command.split("\n");
         for (int i = 0; i < states.length; i++) {
             if (states[i].length() > 0) {
                 String[] cur = states[i].split(",");
+                if (cur[0].equals("ONE") && !cur[1].equals("NewJersey")) {
+                    oppo = "P1";
+                    oppLiveNodes = Integer.parseInt(cur[2]) + Integer.parseInt(cur[4]);
+                } else if (cur[0].equals("TWO") && !cur[1].equals("NewJersey")) {
+                    oppo = "P2";
+                    oppLiveNodes = Integer.parseInt(cur[2]) + Integer.parseInt(cur[4]);
+                }
                 if (isInteger(cur[0]) && cur[3].equals("FREE")) {
                     Map<String, Integer> curMap = new HashMap<String, Integer>();
                     if (!cur[4].equals("null")) {
@@ -145,42 +123,109 @@ public class Client {
                     if (!cur[7].equals("null")) {
                         curMap.put("right", Integer.parseInt(cur[7]));
                     }
-                    relation.put(Integer.parseInt(cur[0]), curMap);
+                    freeNodes.put(Integer.parseInt(cur[0]), curMap);
+                } else if (isInteger(cur[0]) && cur[3].equals("OCCUPIED_" + oppo)) {
+                    Map<String, Integer> curMap = new HashMap<String, Integer>();
+                    if (!cur[4].equals("null")) {
+                        curMap.put("up", Integer.parseInt(cur[4]));
+                    }
+                    if (!cur[5].equals("null")) {
+                        curMap.put("down", Integer.parseInt(cur[5]));
+                    }
+                    if (!cur[6].equals("null")) {
+                        curMap.put("left", Integer.parseInt(cur[6]));
+                    }
+                    if (!cur[7].equals("null")) {
+                        curMap.put("right", Integer.parseInt(cur[7]));
+                    }
+                    oppOccupiedNodes.put(Integer.parseInt(cur[0]), curMap);
                 }
             }
 
         }
-        return relation;
     }
 
-    private static Map<Integer, List<String>> getBestNodeAndPermutation(Map<Integer, Map<String,
-            Integer>> relation, int openDirections) {
+    private static Map<Integer, List<String>> muncherStopper() {
+        Map<Integer, List<String>> stopNodes = new HashMap<Integer, List<String>>();
+        String[] dirs = {"up", "down", "left", "right"};
+
+        // iterate every opponent's muncher
+        for (int node: oppOccupiedNodes.keySet()) {
+
+            // each opponent muncher record the max stop score and number of availble ways.
+            int numWays = 0;
+            int maxScore = 0;
+            int maxNextM = 0;
+            List<String> maxNextMoves = null;
+
+            // iterate through every possible directions.
+            for (String dir: dirs) {
+
+                // if the positin is free
+                if (oppOccupiedNodes.get(node).containsKey(dir) && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
+
+                    numWays++;
+                    int stopNode = oppOccupiedNodes.get(node).get(dir);
+
+                    // calculate the local maximum score among all the possible moves.
+                    int maxMoveScore = 0;
+                    List<String> maxMoves = null;
+                    for (List<String> moves: permutations) {
+                        int score = getScore(stopNode, moves);
+                        if (score > maxMoveScore) {
+                            maxMoveScore = score;
+                            maxMoves = moves;
+                        }
+                    }
+
+                    // update the max of the opponent's muncher
+                    if (maxMoveScore > maxScore) {
+                        maxScore = maxMoveScore;
+                        maxNextM = stopNode;
+                        maxNextMoves = maxMoves;
+                    }
+
+                }
+            }
+
+            // if less equal than 2 available way out and the max Score greater then 2, add it to the stopNodes
+            if (numWays <= 2 && maxScore > 2) {
+                stopNodes.put(maxNextM, maxNextMoves);
+            }
+        }
+
+
+        return stopNodes;
+    }
+
+
+    private static Map<Integer, List<String>> getBestNodeAndPermutation(int openDirections) {
         int node = -1;
         int max = 0;
         List<String> bestPermutation = new LinkedList<String>();
-        for (Integer nodeId: relation.keySet()) {
-            if (relation.get(nodeId).size() != openDirections) {
+        for (Integer nodeId: freeNodes.keySet()) {
+            if (freeNodes.get(nodeId).size() != openDirections) {
                 continue;
             }
             for (List<String> permutation : permutations) {
-                int score = getScore(relation, nodeId, permutation);
+                int score = getScore(nodeId, permutation);
                 if (score > max) {
-                    max = score;
-                    node = nodeId;
-                    bestPermutation = permutation;
+                max = score;
+                node = nodeId;
+                bestPermutation = permutation;
                 }
             }
         }
+
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
-        res.put(node, bestPermutation);
+        if (max >= 4) {
+            res.put(node, bestPermutation);
+        }
+        System.out.println("res: " + res + " max: " + max);
         return res;
     }
 
-    private static int getScore(Map<Integer, Map<String, Integer>> relation, int nodeId,
-                                List<String> permutation) {
-        Map<Integer, Map<String, Integer>> copy = new HashMap<Integer, Map<String, Integer>>
-                (relation);
-
+    private static int getScore(int nodeId, List<String> permutation) {
         int count = 1;
         int direction = 0;
         Set<Integer> set = new HashSet<Integer>();
@@ -188,13 +233,15 @@ public class Client {
         while (true) {
             boolean findNext = false;
             for (int j = direction; j < 4; j++) {
-                if (copy.get(nodeId) != null && copy.get(nodeId).containsKey(permutation
+                if (freeNodes.containsKey(nodeId) && freeNodes.get(nodeId).containsKey(permutation
                         .get(j))) {
-                    nodeId = copy.get(nodeId).get(permutation.get(j));
-                    if (set.contains(nodeId)) {
+
+                    int newNodeId = freeNodes.get(nodeId).get(permutation.get(j));
+                    if (set.contains(newNodeId)) {
                         continue;
                     }
-                    set.add(nodeId);
+                    set.add(newNodeId);
+                    nodeId = newNodeId;
                     count += 1;
                     direction = (j + 1) % 4;
                     findNext = true;
@@ -203,9 +250,10 @@ public class Client {
             }
             if (!findNext) {
                 for (int j = 0; j < direction; j++) {
-                    if (copy.get(nodeId) != null && copy.get(nodeId).containsKey(permutation.get(j)
+                    if (freeNodes.containsKey(nodeId) && freeNodes.get(nodeId).containsKey(permutation
+                                    .get(j)
                     )) {
-                        nodeId = copy.get(nodeId).get(permutation.get(j));
+                        nodeId = freeNodes.get(nodeId).get(permutation.get(j));
                         if (set.contains(nodeId)) {
                             continue;
                         }
