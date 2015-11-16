@@ -15,7 +15,9 @@ public class Client {
 
     private static StringBuffer command = new StringBuffer();
     private static List<List<String>> permutations = new LinkedList<List<String>>();
-
+    private static Map<Integer, Map<String, Integer>> freeNodes = new HashMap<Integer, Map<String, Integer>>();
+    private static Map<Integer, Map<String, Integer>> oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
+    private static int oppLiveNodes = 15;
     public static void main(String[] args) {
         getDirectionPermutation(permutations, new LinkedList<String>(), new String[]{"up",
                 "down", "left", "right"}, new HashSet<String>());
