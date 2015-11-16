@@ -24,13 +24,16 @@ public class Client {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String state;
-            out.println("REGISTER:" + "J");
+            out.println("REGISTER:" + args[0]);
             while ((state = in.readLine()) != null) {
                 if(state.equals("START")){
                     command = new StringBuffer();
                 }
                 else if(state.equals("END")){
-                    out.println(process(command.toString()));
+                    if (!command.toString().replace("\n", "").equals("WAITING")) {
+                        out.println(process(command.toString()));
+                    }
+
                 }else{
                     command.append(state + "\n");
                 }
@@ -42,10 +45,28 @@ public class Client {
     }
 
     private static String process(String command){
-        System.out.println(command);
-        //Starting point for your program
-        Random random = new Random();
-        return random.nextInt(100) + ",UP,DOWN,LEFT,RIGHT";
+        Map<Integer, Map<String, Integer>> map = parseCommand(command);
+        Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
+        for (int i = 4; i >= 1; i--) {
+            res = getBestNodeAndPermutation(map, i);
+            boolean find = false;
+            for (Integer key: res.keySet()) {
+                if (key != -1) {
+                    find = true;
+                    break;
+                }
+            }
+            if (find) {
+                break;
+            }
+        }
+        Integer key = (Integer)res.keySet().toArray()[0];
+        StringBuilder node = new StringBuilder();
+        node.append(key);
+        for (String direction: res.get(key)) {
+            node.append("," + direction);
+        }
+        return  node.toString();
     }
 
     private static Map<Integer, Map<String, Integer>> parseCommand(String command) {
@@ -80,7 +101,7 @@ public class Client {
             Integer>> relation, int openDirections) {
         int node = -1;
         int max = 0;
-        List<String> finalPermutation = new LinkedList<String>();
+        List<String> bestPermutation = new LinkedList<String>();
         for (Integer nodeId: relation.keySet()) {
             if (relation.get(nodeId).size() != openDirections) {
                 continue;
@@ -90,12 +111,12 @@ public class Client {
                 if (score > max) {
                     max = score;
                     node = nodeId;
-                    finalPermutation = permutation;
+                    bestPermutation = permutation;
                 }
             }
         }
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
-        res.put(node, finalPermutation);
+        res.put(node, bestPermutation);
         return res;
     }
 
@@ -103,25 +124,38 @@ public class Client {
                                 List<String> permutation) {
         Map<Integer, Map<String, Integer>> copy = new HashMap<Integer, Map<String, Integer>>
                 (relation);
+
         int count = 1;
         int direction = 0;
+        Set<Integer> set = new HashSet<Integer>();
+        set.add(nodeId);
         while (true) {
             boolean findNext = false;
             for (int j = direction; j < 4; j++) {
-                if (copy.get(nodeId).containsKey(permutation.get(j))) {
+                if (copy.get(nodeId) != null && copy.get(nodeId).containsKey(permutation
+                        .get(j))) {
                     nodeId = copy.get(nodeId).get(permutation.get(j));
+                    if (set.contains(nodeId)) {
+                        continue;
+                    }
+                    set.add(nodeId);
                     count += 1;
-                    direction = (direction + 1) % 4;
+                    direction = (j + 1) % 4;
                     findNext = true;
                     break;
                 }
             }
             if (!findNext) {
                 for (int j = 0; j < direction; j++) {
-                    if (copy.get(nodeId).containsKey(permutation.get(j))) {
+                    if (copy.get(nodeId) != null && copy.get(nodeId).containsKey(permutation.get(j)
+                    )) {
                         nodeId = copy.get(nodeId).get(permutation.get(j));
+                        if (set.contains(nodeId)) {
+                            continue;
+                        }
+                        set.add(nodeId);
                         count += 1;
-                        direction = (direction + 1) % 4;
+                        direction = (j + 1) % 4;
                         findNext = true;
                         break;
                     }
@@ -137,9 +171,7 @@ public class Client {
     public static boolean isInteger(String s) {
         try {
             Integer.parseInt(s);
-        } catch(NumberFormatException e) {
-            return false;
-        } catch(NullPointerException e) {
+        } catch(Exception e) {
             return false;
         }
         return true;
