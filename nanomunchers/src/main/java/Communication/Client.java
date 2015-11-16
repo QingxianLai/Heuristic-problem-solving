@@ -162,10 +162,17 @@ public class Client {
             for (String dir: dirs) {
 
                 // if the positin is free
-                if (oppOccupiedNodes.get(node).containsKey(dir) && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
+                if (oppOccupiedNodes.get(node).containsKey(dir) 
+                        && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
 
                     numWays++;
                     int stopNode = oppOccupiedNodes.get(node).get(dir);
+                    
+                    // if the stopNode has two way to go and we will choose its next node(opposite to the opponent) as stopNode (replace the old one)
+                    stopNode = checkStopNode(node, stopNode);
+                    if (stopNode == -1) {
+                        continue;
+                    }
 
                     // calculate the local maximum score among all the possible moves.
                     int maxMoveScore = 0;
@@ -189,15 +196,40 @@ public class Client {
             }
 
             // if less equal than 2 available way out and the max Score greater then 2, add it to the stopNodes
-            if (numWays <= 4 && maxScore > 0) {
+            if (numWays <= 4 && maxScore >= 2) {
                 stopNodes.put(maxNextM, maxNextMoves);
             }
         }
 
-
+        System.out.println("find Stop Nodes: " + stopNodes.toString());
         return stopNodes;
     }
 
+    // find if the current stop node has a next node opposite to oppponent, then return the nodeId, otherwise return -1.
+    private static int checkStopNode(int oppoNode, int prevNode){
+        // only choose the node has two way to go.
+        if (freeNodes.get(prevNode).keySet().size()!=2) {
+            return -1;
+        }
+        
+        int nextNode = -1;
+
+        for (String dir: freeNodes.get(prevNode).keySet()) {
+
+            //choose the direction opposite to the oppponent's muncher
+            if (freeNodes.get(prevNode).get(dir) != oppoNode) {
+                nextNode = freeNodes.get(prevNode).get(dir); 
+                break;
+            }
+        }
+        
+        // this node should be exist and free to go.
+        if (nextNode == -1 || !freeNodes.containsKey(nextNode)) {
+            return -1;
+        }
+        
+        return nextNode;
+    }
 
     private static Map<Integer, List<String>> getBestNodeAndPermutation(int openDirections) {
         int node = -1;
