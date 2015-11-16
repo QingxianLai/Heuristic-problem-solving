@@ -253,11 +253,12 @@ public class Client {
                     if (freeNodes.containsKey(nodeId) && freeNodes.get(nodeId).containsKey(permutation
                                     .get(j)
                     )) {
-                        nodeId = freeNodes.get(nodeId).get(permutation.get(j));
-                        if (set.contains(nodeId)) {
+                        int newNodeId = freeNodes.get(nodeId).get(permutation.get(j));
+                        if (set.contains(newNodeId)) {
                             continue;
                         }
-                        set.add(nodeId);
+                        set.add(newNodeId);
+                        nodeId = newNodeId;
                         count += 1;
                         direction = (j + 1) % 4;
                         findNext = true;
