@@ -18,6 +18,7 @@ public class Client {
     private static Map<Integer, Map<String, Integer>> freeNodes = new HashMap<Integer, Map<String, Integer>>();
     private static Map<Integer, Map<String, Integer>> oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
     private static int oppLiveNodes = 15;
+    
     public static void main(String[] args) {
         getDirectionPermutation(permutations, new LinkedList<String>(), new String[]{"up",
                 "down", "left", "right"}, new HashSet<String>());
@@ -69,6 +70,59 @@ public class Client {
             node.append("," + direction);
         }
         return  node.toString();
+    }
+    
+    private static Map<Integer, List<String>> muncherStopper() {
+        Map<Integer, List<String>> stopNodes = new HashMap<Integer, List<String>>();
+        String[] dirs = {"up", "down", "left", "right"};
+        
+        // iterate every opponent's muncher
+        for (int node: oppOccupiedNodes.keySet()) {
+            
+            // each opponent muncher record the max stop score and number of availble ways.
+            int numWays = 0;
+            int maxScore = 0;
+            int maxNextM = 0;
+            List<String> maxNextMoves = null;
+
+            // iterate through every possible directions. 
+            for (String dir: dirs) {
+
+                // if the positin is free
+                if (oppOccupiedNodes.get(node).containsKey(dir) && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
+                    
+                    numWays++;
+                    int stopNode = oppOccupiedNodes.get(node).get(dir);
+                    
+                    // calculate the local maximum score among all the possible moves.
+                    int maxMoveScore = 0;
+                    List<String> maxMoves = null;
+                    for (List<String> moves: permutations) {
+                        int score = getScore(stopNode, moves);
+                        if (score > maxMoveScore) {
+                            maxMoveScore = score;
+                            maxMoves = moves;
+                        }
+                    }
+                    
+                    // update the max of the opponent's muncher
+                    if (maxMoveScore > maxScore) {
+                        maxScore = maxMoveScore;
+                        maxNextM = stopNode;
+                        maxNextMoves = maxMoves;
+                    } 
+                    
+                }
+            }
+
+            // if less equal than 2 available way out and the max Score greater then 2, add it to the stopNodes
+            if (numWays <= 2 && maxScore > 2) {
+                stopNodes.put(maxNextM, maxNextMoves);
+            }
+        }
+
+
+        return stopNodes;
     }
 
     private static Map<Integer, Map<String, Integer>> parseCommand(String command) {
