@@ -218,10 +218,7 @@ public class Client {
         }
 
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
-        if (max >= 4) {
-            res.put(node, bestPermutation);
-        }
-        System.out.println("res: " + res + " max: " + max);
+        res.put(node, bestPermutation);
         return res;
     }
 
