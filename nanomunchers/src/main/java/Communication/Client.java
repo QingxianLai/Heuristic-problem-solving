@@ -189,7 +189,7 @@ public class Client {
             }
 
             // if less equal than 2 available way out and the max Score greater then 2, add it to the stopNodes
-            if (numWays <= 2 && maxScore > 2) {
+            if (numWays <= 4 && maxScore > 0) {
                 stopNodes.put(maxNextM, maxNextMoves);
             }
         }
