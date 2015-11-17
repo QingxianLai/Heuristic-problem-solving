@@ -34,21 +34,15 @@ public class Connector implements Runnable{
             LinkedList<String> commands = new LinkedList<String>();
             while ((inputLine = in.readLine()) != null) {
                 Thread.sleep(slowDown);
+
                 if(inputLine.contains("REGISTER:")){
                     String commandString = "START\n" + registerPlayer(inputLine) + "\nEND";
                     out.println(commandString);
                 }else{
-                    commands.add(inputLine);
+                    game.receiveMoves(playerId,inputLine);
+                    out.println("START\n" + poll() + "\nEND");
                 }
 
-                if(game.readyForMove(playerId)){
-                    if(commands.size() > 0){
-                        game.receiveMoves(playerId,commands.pop());
-                        out.println("START\n" + poll() + "\nEND");
-                    }else{
-                        out.println("START\nWAITING\nEND");
-                    }
-                }
             }
         }catch (IOException e){
             e.printStackTrace();

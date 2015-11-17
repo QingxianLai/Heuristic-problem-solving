@@ -28,34 +28,38 @@ public class Client {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String state;
-            out.println("REGISTER:" + "J");
+            out.println("REGISTER:" + "NewJersey");
             while ((state = in.readLine()) != null) {
                 if(state.equals("START")){
                     command = new StringBuffer();
                 }
                 else if(state.equals("END")){
                     if (!command.toString().replace("\n", "").equals("WAITING")) {
-
+                        freeNodes = new HashMap<Integer, Map<String, Integer>>();
+                        oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
+                        parseCommand(command.toString());
+                        System.out.println(oppOccupiedNodes);
                         StringBuilder commands = new StringBuilder();
                         Map<Integer, List<String>> stopNodes = muncherStopper();
                         if (stopNodes.size() > 0) {
-                            for (Integer key: stopNodes.keySet()) {
-                                commands.append(key);
-                                for (String direction: stopNodes.get(key)) {
+                            for (Integer node: stopNodes.keySet()) {
+                                commands.append(node);
+                                for (String direction: stopNodes.get(node)) {
                                     commands.append("," + direction);
                                 }
                                 commands.append("|");
                             }
+
                             commands.append(process(command.toString()));
-                            //System.out.println(commands.toString());
+                            System.out.println(commands.toString());
                             out.println(commands.toString());
                         } else {
-
-                            out.println(process(command.toString()));
-                            //out.println("17,up,left,down,right");
+                            String cmd = process(command.toString());
+                            System.out.println(cmd);
+                            out.println(cmd);
+                            //out.println("116,up,down,left,right");
                         }
                     }
-
                 }else{
                     command.append(state + "\n");
                 }
@@ -66,11 +70,19 @@ public class Client {
         }
     }
 
+    static class Move {
+        public int nodeId;
+        public List<String> permutation;
+
+        public Move(int nodeId, List<String> permutation) {
+            this.nodeId = nodeId;
+            this.permutation = permutation;
+        }
+    }
+
     private static String process(String command){
         //System.out.println(command);
-        freeNodes = new HashMap<Integer, Map<String, Integer>>();
-        oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
-        parseCommand(command);
+
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
         for (int i = 4; i >= 1; i--) {
             res = getBestNodeAndPermutation(i);
@@ -162,12 +174,12 @@ public class Client {
             for (String dir: dirs) {
 
                 // if the positin is free
-                if (oppOccupiedNodes.get(node).containsKey(dir) 
+                if (oppOccupiedNodes.get(node).containsKey(dir)
                         && freeNodes.containsKey(oppOccupiedNodes.get(node).get(dir))) {
 
                     numWays++;
                     int stopNode = oppOccupiedNodes.get(node).get(dir);
-                    
+
                     // if the stopNode has two way to go and we will choose its next node(opposite to the opponent) as stopNode (replace the old one)
                     stopNode = checkStopNode(node, stopNode);
                     if (stopNode == -1) {
@@ -201,7 +213,7 @@ public class Client {
             }
         }
 
-        System.out.println("find Stop Nodes: " + stopNodes.toString());
+        //System.out.println("find Stop Nodes: " + stopNodes.toString());
         return stopNodes;
     }
 
@@ -211,25 +223,26 @@ public class Client {
         if (freeNodes.get(prevNode).keySet().size()!=2) {
             return -1;
         }
-        
+
         int nextNode = -1;
 
         for (String dir: freeNodes.get(prevNode).keySet()) {
 
             //choose the direction opposite to the oppponent's muncher
             if (freeNodes.get(prevNode).get(dir) != oppoNode) {
-                nextNode = freeNodes.get(prevNode).get(dir); 
+                nextNode = freeNodes.get(prevNode).get(dir);
                 break;
             }
         }
-        
+
         // this node should be exist and free to go.
         if (nextNode == -1 || !freeNodes.containsKey(nextNode)) {
             return -1;
         }
-        
+
         return nextNode;
     }
+
 
     private static Map<Integer, List<String>> getBestNodeAndPermutation(int openDirections) {
         int node = -1;
@@ -251,6 +264,8 @@ public class Client {
 
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
         res.put(node, bestPermutation);
+
+        //System.out.println("res: " + res + " max: " + max);
         return res;
     }
 
@@ -259,6 +274,7 @@ public class Client {
         int direction = 0;
         Set<Integer> set = new HashSet<Integer>();
         set.add(nodeId);
+        //System.out.println("permutation: " + permutation);
         while (true) {
             boolean findNext = false;
             for (int j = direction; j < 4; j++) {
@@ -271,6 +287,8 @@ public class Client {
                     }
                     set.add(newNodeId);
                     nodeId = newNodeId;
+                    //System.out.println("cur node id: " + nodeId);
+                    //System.out.println(set);
                     count += 1;
                     direction = (j + 1) % 4;
                     findNext = true;

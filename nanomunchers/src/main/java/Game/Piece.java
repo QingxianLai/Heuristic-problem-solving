@@ -39,26 +39,28 @@ public class Piece {
                 moveOrder.contains(Direction.LEFT) && moveOrder.contains(Direction.RIGHT);
     }
 
-    public void advance(){
+    public Direction advance(){
         if(isDead == false) {
             final int numberOfDirection = 4;
 
             if (location != null && isValidProgram(program)) {
                 //Search for valid move
                 for (int i = moveCount; i < moveCount + numberOfDirection; i++) {
-                    Direction nextMove = program.get((moveCount + i) % numberOfDirection);
+                    Direction nextMove = program.get((i) % numberOfDirection);
 
                     if (location.canMove(nextMove)) {
                         location.move(nextMove);
-                        moveCount++;
-                        return;
+                        moveCount = i + 1;
+                        return nextMove;
                     }
                 }
 
                 //If no valid move available then the piece is dead
                 isDead = true;
+                return null;
             }
         }
+        return null;
     }
 
     public void placeOnNode(Node node){

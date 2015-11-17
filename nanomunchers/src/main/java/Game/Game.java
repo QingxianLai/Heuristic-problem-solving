@@ -27,6 +27,7 @@ public class Game {
     private LinkedList<String> player2Messages = new LinkedList<String>();
 
 
+
     public static Game getInstance(){
         if(game == null){
             game = new Game();
@@ -53,11 +54,11 @@ public class Game {
     }
 
     public void receiveMoves(int player, String move){
-        //Move is expected to be either PASS or nodeId,up,down,left,right \n nodeId,left,up,right,down
-        if(player == 1){
+
+        if(player1 != null && player == 1){
             p1_nextMove = move;
             player1.setNextMove(p1_nextMove);
-        }else{
+        }else if(player2 != null && player == 2){
             p2_nextMove = move;
             player2.setNextMove(p2_nextMove);
         }
@@ -69,7 +70,6 @@ public class Game {
                 p2_nextMove = null;
             }
         }
-
     }
 
 
@@ -92,7 +92,7 @@ public class Game {
 
     private PlayerId advantage(){
         Random random = new Random();
-        Integer player = random.nextInt(1);
+        Integer player = random.nextInt(2);
         if(player.equals(0)){
             return PlayerId.ONE;
         }else{
@@ -231,11 +231,11 @@ public class Game {
         if(player1 != null){
             builder.append("\n\nPlayerID,PlayerName,unused,dead,inPlay,score\n");
             builder.append(player1.getPlayerId() + "," + player1.getPlayerName() + "," + player1.unusedCount() +
-                    "," + player1.deadCount() + "," + player1.inPlayCount() + "," +player1.getScore() + "\n");
+                    "," + player1.deadCount() + "," + player1.inPlayCount() + "," + player_1_score + "\n");
 
             if(player2 != null){
                 builder.append(player2.getPlayerId() + "," + player2.getPlayerName() + "," + player2.unusedCount() +
-                        "," + player2.deadCount() + "," + player2.inPlayCount() + "," +player2.getScore() + "\n");
+                        "," + player2.deadCount() + "," + player2.inPlayCount() + "," + player_2_score + "\n");
             }
         }
         return builder.toString();
@@ -275,6 +275,34 @@ public class Game {
      * @return
      */
     public Map<String,List<String>> getPlayerStats(){
+        int player_1_score=0;
+        int player_2_score = 0;
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("nodeid,xLoc,yLoc,status,up,down,left,right\n");
+        List<Node> sortedNodes = new LinkedList<Node>(this.nodes.values());
+
+        Collections.sort(sortedNodes, new Comparator<Node>() {
+            public int compare(Node o1, Node o2) {
+                return o1.getId() - o2.getId();
+            }
+        });
+
+        for(int i = 0; i < sortedNodes.size(); i++){
+            Status status = sortedNodes.get(i).getStatus();
+
+            if(status.equals(Status.EATEN_P1) || status.equals(Status.OCCUPIED_P1)){
+                player_1_score++;
+            }else if(status.equals(Status.EATEN_P2) || status.equals(Status.OCCUPIED_P2)){
+                player_2_score++;
+            }
+        }
+
+
+
+
+
+
         Map<String,List<String>> playerStats = new HashMap<String, List<String>>();
         if(player1 != null){
             List<String> p1Stats = new LinkedList<String>();
@@ -283,7 +311,7 @@ public class Game {
             p1Stats.add(String.valueOf(player1.unusedCount()));
             p1Stats.add(String.valueOf(player1.deadCount()));
             p1Stats.add(String.valueOf(player1.inPlayCount()));
-            p1Stats.add(String.valueOf(player1.getScore()));
+            p1Stats.add(String.valueOf(player_1_score));
 
             playerStats.put(player1.getPlayerId(),p1Stats);
 
@@ -294,7 +322,7 @@ public class Game {
                 p2Stats.add(String.valueOf(player2.unusedCount()));
                 p2Stats.add(String.valueOf(player2.deadCount()));
                 p2Stats.add(String.valueOf(player2.inPlayCount()));
-                p2Stats.add(String.valueOf(player2.getScore()));
+                p2Stats.add(String.valueOf(player_2_score));
 
                 playerStats.put(player2.getPlayerId(),p2Stats);
             }
