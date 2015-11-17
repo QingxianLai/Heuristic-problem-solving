@@ -38,7 +38,6 @@ public class Client {
                         freeNodes = new HashMap<Integer, Map<String, Integer>>();
                         oppOccupiedNodes = new HashMap<Integer, Map<String, Integer>>();
                         parseCommand(command.toString());
-                        System.out.println(oppOccupiedNodes);
                         StringBuilder commands = new StringBuilder();
                         Map<Integer, List<String>> stopNodes = muncherStopper();
                         if (stopNodes.size() > 0) {
@@ -51,11 +50,9 @@ public class Client {
                             }
 
                             commands.append(process(command.toString()));
-                            System.out.println(commands.toString());
                             out.println(commands.toString());
                         } else {
                             String cmd = process(command.toString());
-                            System.out.println(cmd);
                             out.println(cmd);
                             //out.println("116,up,down,left,right");
                         }
@@ -81,7 +78,6 @@ public class Client {
     }
 
     private static String process(String command){
-        //System.out.println(command);
 
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
         for (int i = 4; i >= 1; i--) {
@@ -97,7 +93,6 @@ public class Client {
                 break;
             }
         }
-        System.out.println(res);
         Integer key = (Integer)res.keySet().toArray()[0];
         //Starting point for your program
         StringBuilder node = new StringBuilder();
@@ -213,7 +208,6 @@ public class Client {
             }
         }
 
-        //System.out.println("find Stop Nodes: " + stopNodes.toString());
         return stopNodes;
     }
 
@@ -265,7 +259,6 @@ public class Client {
         Map<Integer, List<String>> res = new HashMap<Integer, List<String>>();
         res.put(node, bestPermutation);
 
-        //System.out.println("res: " + res + " max: " + max);
         return res;
     }
 
@@ -274,7 +267,6 @@ public class Client {
         int direction = 0;
         Set<Integer> set = new HashSet<Integer>();
         set.add(nodeId);
-        //System.out.println("permutation: " + permutation);
         while (true) {
             boolean findNext = false;
             for (int j = direction; j < 4; j++) {
@@ -287,8 +279,6 @@ public class Client {
                     }
                     set.add(newNodeId);
                     nodeId = newNodeId;
-                    //System.out.println("cur node id: " + nodeId);
-                    //System.out.println(set);
                     count += 1;
                     direction = (j + 1) % 4;
                     findNext = true;
