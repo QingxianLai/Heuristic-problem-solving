@@ -1,6 +1,6 @@
 import socket
 import re
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import LinearRegression
 
 HOST = '127.0.0.1'
 PORT = 9696
@@ -19,14 +19,14 @@ def split_data(data):
     return res
 
 while True:
-    data=s.recv(65536)
+    data = s.recv(16384)
     if data == "gameover":
         break
     data_split = split_data(data)
     total_data.extend(data_split)
     x_train = map(lambda x: x[:-1], total_data)
     y_train = map(lambda x: x[-1], total_data)
-    regr = Ridge()
+    regr = LinearRegression()
     regr.fit(x_train, y_train)
     res = reduce(lambda x, y: x + "1 " if y > 0 else x + "0 ", regr.coef_, "")
     s.sendall(res[:-1])

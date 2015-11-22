@@ -32,15 +32,9 @@ def modify_candidates():
     return " ".join(map(str, array))
 
 while True:
-    if first:
-        first = False
-        res = average_every_value()
-        s.sendall(res)
-    else:
-        data = s.recv(65536)
-        if data == "continue":
-            res = modify_candidates()
-            s.sendall(res)
-        if data == "gameover":
-            break
+    res = average_every_value()
+    s.sendall(res)
+    data = s.recv(8192)
+    if data == "gameover":
+        break
 s.close()
