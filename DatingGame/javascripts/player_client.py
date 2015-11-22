@@ -1,21 +1,46 @@
 import socket
-import random
+import sys
+from random import shuffle
 
 HOST = '127.0.0.1'
 PORT = 6969
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 s.connect((HOST,PORT)) 
 
-#test
+N = int(sys.argv[1])
+first = True
+
+array = []
+
+def average_every_value():
+    res = []
+    if N % 2 == 1:
+        res.append(0)
+    avg = float("{0:.4f}".format(1.0 / (N / 2)))
+    for i in range(N / 2 - 1):
+        res.append(avg)
+        res.append(-avg)
+    res.append(1 - avg * (N / 2 - 1))
+    res.append(-1 + avg * (N / 2 - 1))
+    shuffle(res)
+    array = res
+    return " ".join(map(str, res))
+
+def modify_candidates():
+    num_modify = int(N * 0.05)
+    # TODO add modify strategy
+    return " ".join(map(str, array))
+
 while True:
-    res = "0.3 -0.3 0.2 -0.2 0.4 -0.4 0.05 -0.05 0.05 -0.05"
-    for i in range(10):
-        res += " 0"
-    s.sendall(res)
-    data = s.recv(1024)
-    print data
-    if data == "continue":
+    if first:
+        first = False
+        res = average_every_value()
         s.sendall(res)
-    if data == "gameover":
-        break
+    else:
+        data = s.recv(65536)
+        if data == "continue":
+            res = modify_candidates()
+            s.sendall(res)
+        if data == "gameover":
+            break
 s.close()
