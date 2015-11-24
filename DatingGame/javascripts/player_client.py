@@ -31,12 +31,16 @@ def random_init():
     """docstring for random_modify"""
     pos = []
     neg = []
-    for i in xrange(N):
+    i = 0
+    while i < N:
         val = random.randrange(-100,100)
-        if val >= 0:
+        if val == 0:
+            continue
+        elif val > 0:
             pos.append(val)
         else:
             neg.append(val)
+        i += 1
     pos_sum = sum(pos)
     pos = [float("{0:.2f}".format(x*1.0/pos_sum)) for x in pos]
     pos[-1] += (1-sum(pos))
@@ -46,9 +50,22 @@ def random_init():
     neg = [float("{0:.2f}".format(x*1.0/_neg_sum)) for x in neg]
     neg[-1] -= (sum(neg)+1)
     print "negative weights sum:",sum(neg)
-    pos.extend(neg)
-    shuffle(pos)
-    return " ".join([str(x) for x in pos])
+    all = pos + neg
+    shuffle(all)
+    return all
+
+def random_modify(seq):
+    pos_index = [i for i in range(len(seq)) if seq[i] > 0]
+    n_change = int(0.05 * len(seq))
+    if n_change < 2:
+        return seq
+    ix1, ix2 = random.sample(pos_index, 2)
+    changes = 0.2 * min(seq[ix1], seq[ix2])
+    changes = float("{0:.2f}".format(changes))
+    print "changes: %s; on weights: %s, %s" % (changes, seq[ix1], seq[ix2])
+    seq[ix1] += changes
+    seq[ix2] -= changes
+    return seq
 
 def modify_candidates():
     num_modify = int(N * 0.05)
@@ -56,12 +73,14 @@ def modify_candidates():
     return " ".join(map(str, array))
 
 
-rdini = random_init()
-print "Initial weight:",rdini
+seq = random_init()
+seq_string = " ".join([str(x) for x in seq])
+print "Initial weight:",seq_string
 while True:
     # res = average_every_value()
-    s.sendall(rdini)
+    s.sendall(seq_string)
     data = s.recv(8192)
+    print "modified weights: ", seq_string 
     if data == "gameover":
         break
 s.close()
