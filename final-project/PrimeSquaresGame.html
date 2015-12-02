@@ -87,7 +87,7 @@
   <div class="Names">
     <h1>Input Your Name</h1>
     <form>
-      <input type="text" name="Player One Name" onmouseover="showPopup(380,380)" placeholder="Player One Name"/>
+      <input type="text" name="Player One Name" placeholder="Player One Name"/>
       <input type="text" name="Player Two Name" placeholder="Player Two Name" id="ifYes" style="display:none"/>
       <input type="button" onclick="startGame()" value="Start Game" />
     </form>
@@ -352,6 +352,140 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (var i = data.length; i--;) {
         data[i].draw(ctx);
+      }
+    }
+
+    function checkInput(index, value) {
+      if (isNaN(value) || isNaN(index) || index < 0 || index > 8 || value < 0 || value > 9) {
+        return false;
+      } 
+
+      if (map[index] != null) {
+        return false;
+      }
+
+      if (index != 4 && value == 0) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function greedyMaxMove(){
+      var max_score = -1;
+      var max_move = [-1,-1];
+      for (var idx = 0; idx < 9; idx ++) {
+        for (var val = 0; val<=9; val ++) {
+          if (checkInput(idx, val)) {
+            map[idx] = val;
+            var score = getPrimeCount(idx);
+            if (score > max_score) {
+              max_score = score;
+              max_move = [idx, val];
+            }
+            delete map[idx];
+          }
+        }
+      }
+      // console.log(map);
+      // console.log(max_move);
+      if (max_score != -1) {
+        return max_move;
+      } else {
+        null;
+      }
+    }
+
+
+    function ai(computerIsPlayerOne){
+      // var move  = greedyMaxMove();
+      var score, move = optimizeMove(computerIsPlayerOne, 2, computerIsPlayerOne, playerOneScore, playerTwoScore);
+      return move;
+    }
+
+    function optimizeMove(isMax, maxDepth, isPlayerOne, score1, score2) {
+      // console.log(maxDepth);
+
+      if (maxDepth == 0) {
+        console.log(score1, score2);
+        return [score1 - score2, null];
+      }
+      if (isMax) {
+        var max_score = -300;
+        var max_move = null;
+        var curr_max_score;
+        var cmove = null;
+        for (var idx = 0; idx < 9; idx ++) {
+          for (var val = 0; val <= 9; val ++) {
+            if (!checkInput(idx, val)) {
+              continue;
+            }
+            map[idx] = val;
+            var score = getPrimeCount(idx);
+            if (isPlayerOne) {
+              score1 += score;
+            } else {
+              score2 += score;
+            }
+            // console.log("<<" + score);
+            curr_max_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
+            console.log(curr_max_score);
+            // console.log(score + ">>");
+            if (curr_max_score > max_score) {
+              max_score = curr_max_score;
+              max_move = [idx, val];
+            }
+
+            if (isPlayerOne) {
+              score1 -= score;
+            } else {
+              score2 -= score;
+            }
+
+            delete map[idx];
+          }
+        }
+        // console.log(max_score);
+        return [max_score, max_move];
+      } else {
+        var min_score  = 300;
+        var min_move = null;
+        var curr_min_score;
+        var cmove = null;
+        for (var idx = 0; idx < 9; idx ++) {
+          for (var val = 0; val <= 9; val ++) {
+            if (!checkInput(idx, val)) {
+              continue;
+            }
+            map[idx] = val;
+            var score = getPrimeCount(idx);
+
+            if (isPlayerOne) {
+              score1 += score;
+            } else {
+              score2 += score;
+            }
+            // console.log("<<" + score);
+            curr_min_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
+            // console.log(curr_min_score);
+            // console.log(score + ">>");
+            
+            if (curr_min_score < min_score) {
+              console.log(curr_min_score);
+              min_score = curr_min_score;
+              min_move = [idx, val];
+            }
+
+            if (isPlayerOne) {
+              score1 -= score;
+            } else {
+              score2 -= score;
+            }
+
+            delete map[idx];
+          }
+        }
+        return [min_score, min_move];
       }
     }
 
