@@ -953,6 +953,20 @@
           Num.NINE = new Image();
           Num.NINE.src = _c.toDataURL();
 
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(30, 75);
+          _ctx.moveTo(70, 25);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.stroke();
+          Num.ZERO = new Image();
+          Num.ZERO.src = _c.toDataURL();
+
           tile = Num.BLANK;
         };
 
@@ -988,6 +1002,9 @@
               break;
             case 9:
               tile = Num.NINE;
+              break;
+            case 0:
+              tile = Num.ZERO;
               break;
           }
         }
