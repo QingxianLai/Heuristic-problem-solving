@@ -1,991 +1,1008 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title>PrimeGameSquares</title>
-  <style>
-    canvas {
-      border: 1px solid #FFFFFF;
-      position: absolute;
-      margin: auto;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-    } 
+  <head>
+    <title>Dr Ecco</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+          <link rel="stylesheet" type="text/css" href="style.css" />
+          <link rel="stylesheet" type="text/css" href="../../style.css" media="screen"/>
+  </head>
+  <body>
+    <div style="position:absolute; left:0; top:0%; height:5%; width:80%">
+      <h1 class="title">Prime Game Squares</h1>
+    </div>
+    <div style="position:absolute; height:15%; top:10%; width:80%">
+      <div class="instr">
+        <b>Rules of the game:</b>
+        <ul>
+          <li>Two players take turns to put a number 1-9 into one grid at a time. You can also input 0 in the center-cell, and the last turn would be the second player's.</li>
+          <li>A player gains a point whenever he/she completes a three digit prime number whether left to right, right to left, up to down, down to up, up or down diagonal, or up or down counter-diagonal.</li>
+        </ul>
+      </div>
+      <div>
+        The object of the game is to gain as many scores as possible.
+      </div>
+    </div>
 
-    div {
-      clear: both;
-      margin: 0 50px;
-    }
-
-    /* hide input */
-    input.radio:empty {
-      margin-left: -999px;
-    }
-
-    /* style label */
-    input.radio:empty ~ label {
-      position: relative;
-      float: left;
-      line-height: 2.5em;
-      text-indent: 3.25em;
-      margin-top: 2em;
-      cursor: pointer;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-
-    input.radio:empty ~ label:before {
-      position: absolute;
-      display: block;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      content: '';
-      width: 2.5em;
-      background: #D1D3D4;
-      border-radius: 3px 0 0 3px;
-    }
-
-    /* toggle hover */
-    input.radio:hover:not(:checked) ~ label:before {
-      content:'\2714';
-      text-indent: .9em;
-      color: #C2C2C2;
-    }
-
-    input.radio:hover:not(:checked) ~ label {
-      color: #888;
-    }
-
-    /* toggle on */
-    input.radio:checked ~ label:before {
-      content:'\2714';
-      text-indent: .9em;
-      color: #9CE2AE;
-      background-color: #4DCB6D;
-    }
-
-    input.radio:checked ~ label {
-      color: #777;
-    }
-  </style>
-
-  <div>
-    <input type="radio" name="radio" onclick="javascript:yesnoCheck();" id="radio1" class="radio" checked/>
-    <label for="radio1">Single Player</label>
-  </div>
-
-  <div>
-    <input type="radio" name="radio" onclick="javascript:yesnoCheck();" id="radio2" class="radio"/>
-    <label for="radio2">Multiple Player</label>
-  </div>
-
-  <div class="Names">
-    <h1>Input Your Name</h1>
-    <form>
-      <input type="text" name="Player One Name" placeholder="Player One Name"/>
-      <input type="text" name="Player Two Name" placeholder="Player Two Name" id="ifYes" style="display:none"/>
-      <input type="button" onclick="startGame()" value="Start Game" />
-    </form>
-  </div>
-
-  <style type="text/css">
-    .Names{
-      position: absolute;
-          top: 175px;
-          left: 4.5%;
-          margin-left:-250px;
-          width: 500px; 
-    }
-    .Names{
-        font: 95% Arial, Helvetica, sans-serif;
-        max-width: 250px;
-        margin: 10px auto;
-        padding: 16px;
-        background: #F7F7F7;
-    }
-    .Names h1{
-        background: #43D1AF;
-        padding: 20px 0;
-        font-size: 100%;
-        font-weight: 300;
-        text-align: center;
-        color: #fff;
-        margin: -16px -16px 16px -16px;
-    }
-
-    .Names input[type="text"] {
-        -webkit-transition: all 0.30s ease-in-out;
-        -moz-transition: all 0.30s ease-in-out;
-        -ms-transition: all 0.30s ease-in-out;
-        -o-transition: all 0.30s ease-in-out;
-        outline: none;
-        box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        width: 100%;
-        background: #fff;
-        margin-bottom: 4%;
-        border: 1px solid #ccc;
-        padding: 3%;
-        color: #555;
-        font: 95% Arial, Helvetica, sans-serif;
-    }
-
-    .Names input[type="text"]:focus {
-        box-shadow: 0 0 5px #43D1AF;
-        padding: 3%;
-        border: 1px solid #43D1AF;
-    }
-
-    .Names input[type="button"]
-    {
-        box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        width: 100%;
-        padding: 3%;
-        background: #43D1AF;
-        border-bottom: 2px solid #30C29E;
-        border-top-style: none;
-        border-right-style: none;
-        border-left-style: none;    
-        color: #fff;
-    }
-
-    .Names input[type="submit"]:hover {
-        background: #2EBC99;
-    }
-  </style>
-
-  <div class = "Scores">
-    <p id="p1"><pre id="score1"></pre></p>
-    <p id="p2"><pre id="score2"></pre></p>
-  </div>
-  
-  <style type="text/css">
-    .Scores p[id="p1"]{
-      position: absolute;
-      top: 10px;
-      left: 35%;
-      margin-left:-250px;
-      width: 500px; 
-    }
-    .Scores p[id="p1"]{
-        font: 135% Arial, Helvetica, sans-serif;
-        max-width: 250px;
-        margin: 10px auto;
-        padding: 16px;
-    }
-    .Scores pre[id="score1"]{
-      position: absolute;
-      top: 10px;
-      left: 52%;
-      margin-left:-250px;
-      width: 500px; 
-    }
-    .Scores pre[id="score1"]{
-        font: 135% Arial, Helvetica, sans-serif;
-        max-width: 250px;
-        margin: 10px auto;
-        padding: 16px;
-    }
-    .Scores p[id="p2"]{
-      position: absolute;
-      top: 30px;
-      left: 35%;
-      margin-left:-250px;
-      width: 500px; 
-    }
-    .Scores p[id="p2"]{
-        font: 135% Arial, Helvetica, sans-serif;
-        max-width: 250px;
-        margin: 10px auto;
-        padding: 16px;
-    }
-    .Scores pre[id="score2"]{
-      position: absolute;
-      top: 30px;
-      left: 52%;
-      margin-left:-250px;
-      width: 500px; 
-    }
-    .Scores pre[id="score2"]{
-        font: 135% Arial, Helvetica, sans-serif;
-        max-width: 250px;
-        margin: 10px auto;
-        padding: 16px;
-    }
-  </style>
-
-  <div id="popupcontent"></div> 
-  <style type="text/css">
-    #popupcontent{ 
-      position: absolute; 
-      visibility: hidden; 
-      overflow: hidden; 
-      border:1px solid #CCC; 
-      background-color:#F9F9F9; 
-      border:1px solid #333; 
-      padding:5px; 
-    }  
-  </style>
-
-  <script>
-    var canvas, ctx;
-    var data;
-    var num;
-    var anim = 0;
-    var single = false;
-    var multiple = false;
-    var map = {};
-    var index;
-    var playerOneScore = 0;
-    var playerTwoScore = 0;
-    var playerOneName, playerTwoName = "Computer";
-    var totalNumbers = 0;
-    var playerOneTurn = true;
-    var playerTwoTurn = false;
-    var primes = [101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
-      167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241,
-      251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337,
-      347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431,
-      433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521,
-      523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617,
-      619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719,
-      727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823,
-      827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929,
-      937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
-
-    window.onload = function main() {
-      canvas = document.createElement("canvas");
-      canvas.height = canvas.width = 120 * 3 + 20;
-      ctx = canvas.getContext("2d");
-      document.body.appendChild(canvas);
-
-      canvas.addEventListener("mousedown", mouseDown);
-
-      init();
-      tick();
-    }
-
-    function startGame() {
-      playerOneName = document.getElementsByName("Player One Name")[0].value;
-      document.getElementById('p1').innerHTML = "yerOne: " + playerOneName;
-      document.getElementById('score1').innerHTML = "Score: 0";
-      document.getElementById('p2').innerHTML = "PlayerTwo: " + playerTwoName;
-      document.getElementById('score2').innerHTML = "Score: 0";
-      if (!document.getElementById("radio1").checked) {
-        playerTwoName = document.getElementsByName("Player Two Name")[0].value;
-      } else {
-        if (confirm("Do you choose to move the first turn？")) {  
-            alert("Yes");  
-        } else {  
-            alert("No");  
-            playerOneTurn = false;
-            playerTwoTurn = true;
-        }  
-      }
-    }
-    /*
-    var baseText = null; 
-
-    function showPopup(w,h){ 
-      var popUp = document.getElementById("popupcontent"); 
-      var c = document.createElement("canvas");
-      c.width = c.height = 400;
-      var contex = c.getContext("2d");
-      
-      popUp.appendChild(c);
-
-      c.addEventListener("mousedown", mouseDown);
-
-      d = [];
-      for (var i = 0; i < 9; i++) {
-        var x = (i % 3) * 120 + 20;
-        var y = Math.floor(i / 3) * 120 + 20;
-        d.push(new Num(x, y));
-      }
-      console.log(d);
-      window.requestAnimationFrame(tick);
-      for (var i = d.length; i--;) {
-        d[i].draw(contex);
-      }
-      popUp.style.top = "200px"; 
-      popUp.style.left = "200px"; 
-      popUp.style.width = w + "px"; 
-      popUp.style.height = h + "px"; 
-      if (baseText == null) baseText = popUp.innerHTML; 
-      popUp.innerHTML = baseText; 
-      
-      popUp.style.visibility = "visible"; 
-    } 
-
-    function hidePopup(){ 
-      var popUp = document.getElementById("popupcontent"); 
-      popUp.style.visibility = "hidden"; 
-    }  
-    */
-
-    function init() {
-      if (data == null) {
-        data = [];
-        for (var i = 0; i < 9; i++) {
-          var x = (i % 3) * 120 + 20;
-          var y = Math.floor(i / 3) * 120 + 20;
-          data.push(new Num(x, y));
-        }
-      }
-    }
-
-    function tick() {
-      window.requestAnimationFrame(tick);
-      render();
-    }
-
-
-    function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (var i = data.length; i--;) {
-        data[i].draw(ctx);
-      }
-    }
-
-    function checkInput(index, value) {
-      if (isNaN(value) || isNaN(index) || index < 0 || index > 8 || value < 0 || value > 9) {
-        return false;
+    <div id="gameArea" style="position:absolute;top:30%; height:60%; width:90%">
+      <style>
+      canvas {
+        border: 1px solid #FFFFFF;
+        position: absolute;
+        margin: auto;
+        top: 78%;
+        bottom: 40%;
+        left: 0;
+        right: 0;
       } 
 
-      if (map[index] != null) {
-        return false;
+      div {
+        clear: both;
+        margin: 0 50px;
       }
 
-      if (index != 4 && value == 0) {
-        return false;
+      /* hide input */
+      input.radio:empty {
+        margin-left: -999px;
       }
 
-      return true;
-    }
+      /* style label */
+      input.radio:empty ~ label {
+        position: relative;
+        float: left;
+        line-height: 2.5em;
+        text-indent: 3.25em;
+        margin-top: 2em;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
 
-    function greedyMaxMove(){
-      var max_score = -1;
-      var max_move = [-1,-1];
-      for (var idx = 0; idx < 9; idx ++) {
-        for (var val = 0; val<=9; val ++) {
-          if (checkInput(idx, val)) {
-            map[idx] = val;
-            var score = getPrimeCount(idx);
-            if (score > max_score) {
-              max_score = score;
-              max_move = [idx, val];
-            }
-            delete map[idx];
+      input.radio:empty ~ label:before {
+        position: absolute;
+        display: block;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        content: '';
+        width: 2.5em;
+        background: #D1D3D4;
+        border-radius: 3px 0 0 3px;
+      }
+
+      /* toggle hover */
+      input.radio:hover:not(:checked) ~ label:before {
+        content:'\2714';
+        text-indent: .9em;
+        color: #C2C2C2;
+      }
+
+      input.radio:hover:not(:checked) ~ label {
+        color: #888;
+      }
+
+      /* toggle on */
+      input.radio:checked ~ label:before {
+        content:'\2714';
+        text-indent: .9em;
+        color: #9CE2AE;
+        background-color: #4DCB6D;
+      }
+
+      input.radio:checked ~ label {
+        color: #777;
+      }
+    </style>
+
+    <div>
+      <input type="radio" name="radio" onclick="javascript:yesnoCheck();" id="radio1" class="radio" checked/>
+      <label for="radio1">Single Player</label>
+    </div>
+
+    <div>
+      <input type="radio" name="radio" onclick="javascript:yesnoCheck();" id="radio2" class="radio"/>
+      <label for="radio2">Multiple Player</label>
+    </div>
+
+    <div class="Names">
+      <h1>Input Your Name</h1>
+      <form>
+        <input type="text" name="Player One Name" placeholder="Player One Name"/>
+        <input type="text" name="Player Two Name" placeholder="Player Two Name" id="ifYes" style="display:none"/>
+        <input type="button" onclick="startGame()" value="Start Game" />
+      </form>
+    </div>
+
+    <style type="text/css">
+      .Names{
+        position: absolute;
+            top: 175px;
+            left: 4.5%;
+            margin-left:-250px;
+            width: 500px; 
+      }
+      .Names{
+          font: 95% Arial, Helvetica, sans-serif;
+          max-width: 250px;
+          margin: 10px auto;
+          padding: 16px;
+          background: #F7F7F7;
+      }
+      .Names h1{
+          background: #43D1AF;
+          padding: 20px 0;
+          font-size: 100%;
+          font-weight: 300;
+          text-align: center;
+          color: #fff;
+          margin: -16px -16px 16px -16px;
+      }
+
+      .Names input[type="text"] {
+          -webkit-transition: all 0.30s ease-in-out;
+          -moz-transition: all 0.30s ease-in-out;
+          -ms-transition: all 0.30s ease-in-out;
+          -o-transition: all 0.30s ease-in-out;
+          outline: none;
+          box-sizing: border-box;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          width: 100%;
+          background: #fff;
+          margin-bottom: 4%;
+          border: 1px solid #ccc;
+          padding: 3%;
+          color: #555;
+          font: 95% Arial, Helvetica, sans-serif;
+      }
+
+      .Names input[type="text"]:focus {
+          box-shadow: 0 0 5px #43D1AF;
+          padding: 3%;
+          border: 1px solid #43D1AF;
+      }
+
+      .Names input[type="button"]
+      {
+          box-sizing: border-box;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          width: 100%;
+          padding: 3%;
+          background: #43D1AF;
+          border-bottom: 2px solid #30C29E;
+          border-top-style: none;
+          border-right-style: none;
+          border-left-style: none;    
+          color: #fff;
+      }
+
+      .Names input[type="submit"]:hover {
+          background: #2EBC99;
+      }
+    </style>
+
+    <div class = "Scores">
+      <p id="p1"><pre id="score1"></pre></p>
+      <p id="p2"><pre id="score2"></pre></p>
+    </div>
+    
+    <style type="text/css">
+      .Scores p[id="p1"]{
+        position: absolute;
+        top: 10px;
+        left: 35%;
+        margin-left:-250px;
+        width: 500px; 
+      }
+      .Scores p[id="p1"]{
+          font: 135% Arial, Helvetica, sans-serif;
+          max-width: 250px;
+          margin: 10px auto;
+          padding: 16px;
+      }
+      .Scores pre[id="score1"]{
+        position: absolute;
+        top: 10px;
+        left: 52%;
+        margin-left:-250px;
+        width: 500px; 
+      }
+      .Scores pre[id="score1"]{
+          font: 135% Arial, Helvetica, sans-serif;
+          max-width: 250px;
+          margin: 10px auto;
+          padding: 16px;
+      }
+      .Scores p[id="p2"]{
+        position: absolute;
+        top: 30px;
+        left: 35%;
+        margin-left:-250px;
+        width: 500px; 
+      }
+      .Scores p[id="p2"]{
+          font: 135% Arial, Helvetica, sans-serif;
+          max-width: 250px;
+          margin: 10px auto;
+          padding: 16px;
+      }
+      .Scores pre[id="score2"]{
+        position: absolute;
+        top: 30px;
+        left: 52%;
+        margin-left:-250px;
+        width: 500px; 
+      }
+      .Scores pre[id="score2"]{
+          font: 135% Arial, Helvetica, sans-serif;
+          max-width: 250px;
+          margin: 10px auto;
+          padding: 16px;
+      }
+    </style>
+
+    <div id="popupcontent"></div> 
+    <style type="text/css">
+      #popupcontent{ 
+        position: absolute; 
+        visibility: hidden; 
+        overflow: hidden; 
+        border:1px solid #CCC; 
+        background-color:#F9F9F9; 
+        border:1px solid #333; 
+        padding:5px; 
+      }  
+    </style>
+
+    <script>
+      var canvas, ctx;
+      var data;
+      var anim = 0;
+      var single = false;
+      var multiple = false;
+      var map = {};
+      var computerIsplayerOne = false;
+      var playerOneScore = 0;
+      var playerTwoScore = 0;
+      var playerOneName, playerTwoName = "AI";
+      var totalNumbers = 0;
+      var playerOneTurn = true;
+      var playerTwoTurn = false;
+      var primes = [101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
+        167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241,
+        251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337,
+        347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431,
+        433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521,
+        523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617,
+        619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719,
+        727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823,
+        827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929,
+        937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
+
+      window.onload = function main() {
+        canvas = document.createElement("canvas");
+        canvas.height = canvas.width = 120 * 3 + 20;
+        ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+
+        canvas.addEventListener("mousedown", mouseDown);
+
+        init();
+        tick();
+      }
+
+      function startGame() {
+        playerOneName = document.getElementsByName("Player One Name")[0].value;
+        document.getElementById('p1').innerHTML = "PlayerOne: " + playerOneName;
+        document.getElementById('score1').innerHTML = "Score: 0";
+        document.getElementById('p2').innerHTML = "PlayerTwo: " + playerTwoName;
+        document.getElementById('score2').innerHTML = "Score: 0";
+        if (!document.getElementById("radio1").checked) {
+          multiple = true;
+          playerTwoName = document.getElementsByName("Player Two Name")[0].value;
+        } else {
+          single = true;
+          if (confirm("Do you choose to move the first turn？")) {  
+              alert("Yes");  
+          } else {  
+              alert("No");  
+              computerIsplayerOne = true;
+              var move = ai(computerIsplayerOne);
+              map[move[1][0]] = move[1][1];
+              data[move[1][0]].flip(move[1][1]);
+              playerOneTurn = true;
+              playerTwoTurn = false;
+              totalNumbers += 1;
+          }  
+        }
+      }
+
+      function init() {
+        if (data == null) {
+          data = [];
+          for (var i = 0; i < 9; i++) {
+            var x = (i % 3) * 120 + 20;
+            var y = Math.floor(i / 3) * 120 + 20;
+            data.push(new Num(x, y));
           }
         }
       }
-      // console.log(map);
-      // console.log(max_move);
-      if (max_score != -1) {
-        return max_move;
-      } else {
-        null;
+
+      function tick() {
+        window.requestAnimationFrame(tick);
+        render();
       }
-    }
 
 
-    function ai(computerIsPlayerOne){
-      // var move  = greedyMaxMove();
-      var score, move = optimizeMove(computerIsPlayerOne, 2, computerIsPlayerOne, playerOneScore, playerTwoScore);
-      return move;
-    }
-
-    function optimizeMove(isMax, maxDepth, isPlayerOne, score1, score2) {
-      // console.log(maxDepth);
-
-      if (maxDepth == 0) {
-        console.log(score1, score2);
-        return [score1 - score2, null];
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = data.length; i--;) {
+          data[i].draw(ctx);
+        }
       }
-      if (isMax) {
-        var max_score = -300;
-        var max_move = null;
-        var curr_max_score;
-        var cmove = null;
+
+      function checkInput(index, value) {
+        if (isNaN(value) || isNaN(index) || index < 0 || index > 8 || value < 0 || value > 9) {
+          return false;
+        } 
+
+        if (map[index] != null) {
+          return false;
+        }
+
+        if (index != 4 && value == 0) {
+          return false;
+        }
+
+        return true;
+      }
+
+      function greedyMaxMove(){
+        var max_score = -1;
+        var max_move = [-1,-1];
         for (var idx = 0; idx < 9; idx ++) {
-          for (var val = 0; val <= 9; val ++) {
-            if (!checkInput(idx, val)) {
-              continue;
+          for (var val = 0; val<=9; val ++) {
+            if (checkInput(idx, val)) {
+              map[idx] = val;
+              var score = getPrimeCount(idx);
+              if (score > max_score) {
+                max_score = score;
+                max_move = [idx, val];
+              }
+              delete map[idx];
             }
-            map[idx] = val;
-            var score = getPrimeCount(idx);
-            if (isPlayerOne) {
-              score1 += score;
-            } else {
-              score2 += score;
-            }
-            // console.log("<<" + score);
-            curr_max_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
-            console.log(curr_max_score);
-            // console.log(score + ">>");
-            if (curr_max_score > max_score) {
-              max_score = curr_max_score;
-              max_move = [idx, val];
-            }
-
-            if (isPlayerOne) {
-              score1 -= score;
-            } else {
-              score2 -= score;
-            }
-
-            delete map[idx];
           }
         }
-        // console.log(max_score);
-        return [max_score, max_move];
-      } else {
-        var min_score  = 300;
-        var min_move = null;
-        var curr_min_score;
-        var cmove = null;
-        for (var idx = 0; idx < 9; idx ++) {
-          for (var val = 0; val <= 9; val ++) {
-            if (!checkInput(idx, val)) {
-              continue;
-            }
-            map[idx] = val;
-            var score = getPrimeCount(idx);
+        // console.log(map);
+        // console.log(max_move);
+        if (max_score != -1) {
+          return max_move;
+        } else {
+          null;
+        }
+      }
 
-            if (isPlayerOne) {
-              score1 += score;
-            } else {
-              score2 += score;
+
+      function ai(computerIsPlayerOne){
+        // var move  = greedyMaxMove();
+        var score, move = optimizeMove(computerIsPlayerOne, 2, computerIsPlayerOne, playerOneScore, playerTwoScore);
+        return move;
+      }
+
+      function optimizeMove(isMax, maxDepth, isPlayerOne, score1, score2) {
+        // console.log(maxDepth);
+
+        if (maxDepth == 0) {
+          // console.log(score1, score2);
+          return [score1 - score2, null];
+        }
+        if (isMax) {
+          var max_score = -300;
+          var max_move = null;
+          var curr_max_score;
+          var cmove = null;
+          for (var idx = 0; idx < 9; idx ++) {
+            for (var val = 0; val <= 9; val ++) {
+              if (!checkInput(idx, val)) {
+                continue;
+              }
+              map[idx] = val;
+              var score = getPrimeCount(idx);
+              if (isPlayerOne) {
+                score1 += score;
+              } else {
+                score2 += score;
+              }
+              // console.log("<<" + score);
+              curr_max_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
+              // console.log(curr_max_score);
+              // console.log(score + ">>");
+              if (curr_max_score > max_score) {
+                max_score = curr_max_score;
+                max_move = [idx, val];
+              }
+
+              if (isPlayerOne) {
+                score1 -= score;
+              } else {
+                score2 -= score;
+              }
+
+              delete map[idx];
             }
-            // console.log("<<" + score);
-            curr_min_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
-            // console.log(curr_min_score);
-            // console.log(score + ">>");
+          }
+          // console.log(max_score);
+          return [max_score, max_move];
+        } else {
+          var min_score  = 300;
+          var min_move = null;
+          var curr_min_score;
+          var cmove = null;
+          for (var idx = 0; idx < 9; idx ++) {
+            for (var val = 0; val <= 9; val ++) {
+              if (!checkInput(idx, val)) {
+                continue;
+              }
+              map[idx] = val;
+              var score = getPrimeCount(idx);
+
+              if (isPlayerOne) {
+                score1 += score;
+              } else {
+                score2 += score;
+              }
+              // console.log("<<" + score);
+              curr_min_score = optimizeMove(!isMax, maxDepth-1, !isPlayerOne, score1, score2)[0];
+              // console.log(curr_min_score);
+              // console.log(score + ">>");
+              
+              if (curr_min_score < min_score) {
+                // console.log(curr_min_score);
+                min_score = curr_min_score;
+                min_move = [idx, val];
+              }
+
+              if (isPlayerOne) {
+                score1 -= score;
+              } else {
+                score2 -= score;
+              }
+
+              delete map[idx];
+            }
+          }
+          return [min_score, min_move];
+        }
+      }
+
+      function mouseDown(evt) {
+        var el = evt.target;
+        var px = evt.clientX - el.offsetLeft;
+        var py = evt.clientY - el.offsetTop;
+        if (px % 120 >= 20 && py % 120 >= 20) {
+          var idx = Math.floor(px / 120) + Math.floor(py / 120) * 3;
+          if (!data[idx].hasData()) {
+            var num = prom2(idx);
+            //console.log(num);
+            //openwin();
+            data[idx].flip(num);
+            map[idx] = num;
+
+            var count = getPrimeCount(idx);
             
-            if (curr_min_score < min_score) {
-              console.log(curr_min_score);
-              min_score = curr_min_score;
-              min_move = [idx, val];
+            if (totalNumbers == 8) {
+              playerOneTurn = false;
+              playerTwoTurn = true;
             }
-
-            if (isPlayerOne) {
-              score1 -= score;
+            if (playerOneTurn) {
+              playerOneScore += count;
+              playerOneTurn = false;
+              playerTwoTurn = true;
+              document.getElementById('score1').innerHTML = "Score: " + playerOneScore;
             } else {
-              score2 -= score;
+              playerTwoScore += count;
+              playerOneTurn = true;
+              playerTwoTurn = false;
+              document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
             }
-
-            delete map[idx];
+            if (totalNumbers == 8) {
+              gameOver();
+            }
+            totalNumbers += 1;
+            if (single && totalNumbers == 8 && computerIsplayerOne) {
+              playerTwoTurn = false;
+            }
+            if (single && playerTwoTurn) {
+              var move = ai(computerIsplayerOne);
+              map[move[1][0]] = move[1][1];
+              data[move[1][0]].flip(move[1][1]);
+              playerOneTurn = true;
+              playerTwoTurn = false;
+              totalNumbers += 1;
+              var count = getPrimeCount(move[1][0]);
+              playerTwoScore += count;
+              document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
+              if (totalNumbers == 8) {
+                var move = ai(computerIsplayerOne);
+                map[move[1][0]] = move[1][1];
+                data[move[1][0]].flip(move[1][1]);
+                var count = getPrimeCount(move[1][0]);
+                playerTwoScore += count;
+                document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
+                gameOver();
+              }
+            }
+            
           }
         }
-        return [min_score, min_move];
       }
-    }
 
-    function mouseDown(evt) {
-      var el = evt.target;
-      var px = evt.clientX - el.offsetLeft;
-      var py = evt.clientY - el.offsetTop;
-      if (px % 120 >= 20 && py % 120 >= 20) {
-        var idx = Math.floor(px / 120) + Math.floor(py / 120) * 3;
-        if (!data[idx].hasData()) {
-          var num = prom2(idx);
-          console.log(num);
-          //openwin();
-          data[idx].flip(num);
-          map[idx] = num;
+      function gameOver() {
+        if (playerOneScore > playerTwoScore) {
+          alert(playerOneName + " wins!");
+        } else if (playerOneScore < playerTwoScore) {
+          alert(playerTwoName + " wins!");
+        } else {
+          alert("Ties!");
+        }
+      }
 
-          var count = getPrimeCount(idx);
+      function prom2(idx) {  
+
+        var num = parseInt(prompt("input number", ""));
+        if (isNaN(num)) {
+          alert("Please input correct number");
+        }
+        if (idx != 4 && num == 0) {
+          alert("You cannot input 0 here");
+        }
+        return num;
+      }
+
+      function prom() {  
+        var loc = window.location.pathname;
+        var dir = loc.substring(0, loc.lastIndexOf('/'));
+        var innerHtml = dir + '/page.html';
+        var numberWindow = window.open(innerHtml, 'Numbers', 'height=400, width=400, top=0, left=0');
+      }
+
+      function yesnoCheck() {
+        if (document.getElementById('radio1').checked) {
+            document.getElementById('ifYes').style.display = 'none';
+        } else {
+            document.getElementById('ifYes').style.display = 'block';
+        }
+      }
+
+
+
+      function getValueFromChild(myVal) {
+        index = myVal;
+      }
+
+      function getPlayMode() {
+        if (document.getElementById("single").checked) {
+          single = true;
+          //console.log(single);
+        } 
+        if (document.getElementById("multiple").checked) {
+          multiple = true;
+          //console.log(multiple);
+        }
+      }
+
+      function getPrimeCount(index) {
+        var count = 0;
+        if (index == 0) {
+          if ((1 in map) && (2 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0]+ map[1] * 10 + map[2] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (8 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0]  + map[4] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((3 in map) && (6 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 1) {
+          if ((0 in map) && (2 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[1] * 10 + map[2] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (7 in map)) {
+            if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 2) {
+          if ((1 in map) && (0 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[1] * 10 + map[2] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((5 in map) && (8 in map)) {
+            if (primes.indexOf(map[2] * 100 + map[5] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[2] + map[5] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (6 in map)) {
+            if (primes.indexOf(map[2] * 100 + map[4] * 10 + map[6]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[2] + map[4] * 10 + map[6] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 3) {
+          if ((0 in map) && (6 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (5 in map)) {
+            if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 4) {
+          if ((0 in map) && (8 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[4] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((2 in map) && (6 in map)) {
+            if (primes.indexOf(map[2] * 100 + map[4] * 10 + map[6]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[2] + map[4] * 10 + map[6] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((1 in map) && (7 in map)) {
+            if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((3 in map) && (5 in map)) {
+            if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 5) {
+          if ((2 in map) && (8 in map)) {
+            if (primes.indexOf(map[2] * 100 + map[5] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[2] + map[5] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (3 in map)) {
+            if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 6) {
+          if ((0 in map) && (3 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((7 in map) && (8 in map)) {
+            if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((4 in map) && (2 in map)) {
+            if (primes.indexOf(map[6] * 100 + map[4] * 10 + map[2]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[6] + map[4] * 10 + map[2] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 7) {
+          if ((6 in map) && (8 in map)) {
+            if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((1 in map) && (4 in map)) {
+            if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        if (index == 8) {
+          if ((0 in map) && (4 in map)) {
+            if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[0] + map[4] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((7 in map) && (6 in map)) {
+            if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
+              count += 1;
+            }
+          }
+          if ((5 in map) && (2 in map)) {
+            if (primes.indexOf(map[8] * 100 + map[5] * 10 + map[2]) > -1) {
+              count += 1;
+            }
+            if (primes.indexOf(map[8] + map[5] * 10 + map[2] * 100) > -1) {
+              count += 1;
+            }
+          }
+        }
+        return count;
+      }
+
+      function Num(x, y) {
+        var x = x, y = y;
+        var tile = Num.BLANK;
+        if (tile == null) {
+          var _c = document.createElement("canvas");
+          _c.width = _c.height = 100;
+          _ctx = _c.getContext("2d");
           
-          if (totalNumbers == 8) {
-            playerOneTurn = false;
-            playerTwoTurn = true;
-          }
-          if (playerOneTurn) {
-            playerOneScore += count;
-            playerOneTurn = false;
-            playerTwoTurn = true;
-            document.getElementById('score1').innerHTML = "Score: " + playerOneScore;
-          } else {
-            playerTwoScore += count;
-            playerOneTurn = true;
-            playerTwoTurn = false;
-            document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
-          }
-          if (totalNumbers == 8) {
-            if (playerOneScore > playerTwoScore) {
-              alert(playerOneName + " wins!");
-            } else if (playerOneScore < playerTwoScore) {
-              alert(playerTwoName + " wins!");
-            } else {
-              alert("Ties!");
-            }
-          }
-          totalNumbers += 1;
-        }
-      }
-    }
+          _ctx.fillStyle = "skyblue";
+          _ctx.lineWidth = 4;
+          _ctx.strokeStyle = "white";
+          _ctx.lineCap = "round";
 
-    function prom2(idx) {  
+          _ctx.fillRect(0, 0, 100, 100);
+          Num.BLANK = new Image();
+          Num.BLANK.src = _c.toDataURL();
 
-      var num = parseInt(prompt("input number", ""));
-      if (isNaN(num)) {
-        alert("Please input correct number");
-      }
-      if (idx != 4 && num == 0) {
-        alert("You cannot input 0 here");
-      }
-      return num;
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(50, 25);
+          _ctx.lineTo(50, 75);
+          _ctx.moveTo(40, 30);
+          _ctx.lineTo(50, 25);
+          _ctx.moveTo(40, 75);
+          _ctx.lineTo(60, 75);
+          _ctx.stroke();
+          Num.ONE = new Image();
+          Num.ONE.src = _c.toDataURL();
 
-    function prom() {  
-      var loc = window.location.pathname;
-      var dir = loc.substring(0, loc.lastIndexOf('/'));
-      var innerHtml = dir + '/page.html';
-      var numberWindow = window.open(innerHtml, 'Numbers', 'height=400, width=400, top=0, left=0');
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(70, 25);
+          _ctx.lineTo(70, 50);
+          _ctx.moveTo(70, 50);
+          _ctx.lineTo(30, 50);
+          _ctx.moveTo(30, 50);
+          _ctx.lineTo(30, 75);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.stroke();
+          Num.TWO = new Image();
+          Num.TWO.src = _c.toDataURL();
 
-    function yesnoCheck() {
-      if (document.getElementById('radio1').checked) {
-          document.getElementById('ifYes').style.display = 'none';
-      } else {
-          document.getElementById('ifYes').style.display = 'block';
-      }
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(70, 25);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(70, 50);
+          _ctx.lineTo(30, 50);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.stroke();
+          Num.THREE = new Image();
+          Num.THREE.src = _c.toDataURL();
 
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(50, 25);
+          _ctx.lineTo(50, 75);
+          _ctx.moveTo(25, 55);
+          _ctx.lineTo(50, 25);
+          _ctx.moveTo(25, 55);
+          _ctx.lineTo(65, 55);
+          _ctx.stroke();
+          Num.FOUR = new Image();
+          Num.FOUR.src = _c.toDataURL();
 
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(30, 50);
+          _ctx.moveTo(30, 50);
+          _ctx.lineTo(70, 50);
+          _ctx.moveTo(70, 50);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(70, 75);
+          _ctx.lineTo(30, 75);
+          _ctx.stroke();
+          Num.FIVE = new Image();
+          Num.FIVE.src = _c.toDataURL();
 
-    function getValueFromChild(myVal) {
-      index = myVal;
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(30, 75);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(70, 75);
+          _ctx.lineTo(70, 50);
+          _ctx.moveTo(70, 50);
+          _ctx.lineTo(30, 50);
+          _ctx.stroke();
+          Num.SIX = new Image();
+          Num.SIX.src = _c.toDataURL();
 
-    function getPlayMode() {
-      if (document.getElementById("single").checked) {
-        single = true;
-        console.log(single);
-      } 
-      if (document.getElementById("multiple").checked) {
-        multiple = true;
-        console.log(multiple);
-      }
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(35, 25);
+          _ctx.lineTo(65, 25);
+          _ctx.moveTo(65, 25);
+          _ctx.lineTo(50, 75);
+          _ctx.stroke();
+          Num.SEVEN = new Image();
+          Num.SEVEN.src = _c.toDataURL();
 
-    function getPrimeCount(index) {
-      var count = 0;
-      if (index == 0) {
-        if ((1 in map) && (2 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0]+ map[1] * 10 + map[2] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (8 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0]  + map[4] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((3 in map) && (6 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 1) {
-        if ((0 in map) && (2 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[1] * 10 + map[2] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (7 in map)) {
-          if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 2) {
-        if ((1 in map) && (0 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[1] * 10 + map[2]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[1] * 10 + map[2] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((5 in map) && (8 in map)) {
-          if (primes.indexOf(map[2] * 100 + map[5] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[2] + map[5] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (6 in map)) {
-          if (primes.indexOf(map[2] * 100 + map[4] * 10 + map[6]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[2] + map[4] * 10 + map[6] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 3) {
-        if ((0 in map) && (6 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (5 in map)) {
-          if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 4) {
-        if ((0 in map) && (8 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[4] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((2 in map) && (6 in map)) {
-          if (primes.indexOf(map[2] * 100 + map[4] * 10 + map[6]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[2] + map[4] * 10 + map[6] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((1 in map) && (7 in map)) {
-          if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((3 in map) && (5 in map)) {
-          if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 5) {
-        if ((2 in map) && (8 in map)) {
-          if (primes.indexOf(map[2] * 100 + map[5] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[2] + map[5] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (3 in map)) {
-          if (primes.indexOf(map[3] * 100 + map[4] * 10 + map[5]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[3] + map[4] * 10 + map[5] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 6) {
-        if ((0 in map) && (3 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[3] * 10 + map[6]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[3] * 10 + map[6] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((7 in map) && (8 in map)) {
-          if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((4 in map) && (2 in map)) {
-          if (primes.indexOf(map[6] * 100 + map[4] * 10 + map[2]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[6] + map[4] * 10 + map[2] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 7) {
-        if ((6 in map) && (8 in map)) {
-          if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((1 in map) && (4 in map)) {
-          if (primes.indexOf(map[1] * 100 + map[4] * 10 + map[7]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[1] + map[4] * 10 + map[7] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      if (index == 8) {
-        if ((0 in map) && (4 in map)) {
-          if (primes.indexOf(map[0] * 100 + map[4] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[0] + map[4] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((7 in map) && (6 in map)) {
-          if (primes.indexOf(map[6] * 100 + map[7] * 10 + map[8]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[6] + map[7] * 10 + map[8] * 100) > -1) {
-            count += 1;
-          }
-        }
-        if ((5 in map) && (2 in map)) {
-          if (primes.indexOf(map[8] * 100 + map[5] * 10 + map[2]) > -1) {
-            count += 1;
-          }
-          if (primes.indexOf(map[8] + map[5] * 10 + map[2] * 100) > -1) {
-            count += 1;
-          }
-        }
-      }
-      return count;
-    }
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(30, 75);
+          _ctx.moveTo(70, 25);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(30, 50);
+          _ctx.lineTo(70, 50);
+          _ctx.stroke();
+          Num.EIGHT = new Image();
+          Num.EIGHT.src = _c.toDataURL();
 
-    function Num(x, y) {
-      var x = x, y = y;
-      var tile = Num.BLANK;
-      if (tile == null) {
-        var _c = document.createElement("canvas");
-        _c.width = _c.height = 100;
-        _ctx = _c.getContext("2d");
-        
-        _ctx.fillStyle = "skyblue";
-        _ctx.lineWidth = 4;
-        _ctx.strokeStyle = "white";
-        _ctx.lineCap = "round";
+          _ctx.fillRect(0, 0, 100, 100);
+          _ctx.beginPath();
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(70, 25);
+          _ctx.moveTo(30, 25);
+          _ctx.lineTo(30, 50);
+          _ctx.moveTo(70, 25);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(30, 75);
+          _ctx.lineTo(70, 75);
+          _ctx.moveTo(30, 50);
+          _ctx.lineTo(70, 50);
+          _ctx.stroke();
+          Num.NINE = new Image();
+          Num.NINE.src = _c.toDataURL();
 
-        _ctx.fillRect(0, 0, 100, 100);
-        Num.BLANK = new Image();
-        Num.BLANK.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(50, 25);
-        _ctx.lineTo(50, 75);
-        _ctx.moveTo(40, 30);
-        _ctx.lineTo(50, 25);
-        _ctx.moveTo(40, 75);
-        _ctx.lineTo(60, 75);
-        _ctx.stroke();
-        Num.ONE = new Image();
-        Num.ONE.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(70, 25);
-        _ctx.lineTo(70, 50);
-        _ctx.moveTo(70, 50);
-        _ctx.lineTo(30, 50);
-        _ctx.moveTo(30, 50);
-        _ctx.lineTo(30, 75);
-        _ctx.moveTo(30, 75);
-        _ctx.lineTo(70, 75);
-        _ctx.stroke();
-        Num.TWO = new Image();
-        Num.TWO.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(70, 25);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(70, 50);
-        _ctx.lineTo(30, 50);
-        _ctx.moveTo(30, 75);
-        _ctx.lineTo(70, 75);
-        _ctx.stroke();
-        Num.THREE = new Image();
-        Num.THREE.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(50, 25);
-        _ctx.lineTo(50, 75);
-        _ctx.moveTo(25, 55);
-        _ctx.lineTo(50, 25);
-        _ctx.moveTo(25, 55);
-        _ctx.lineTo(65, 55);
-        _ctx.stroke();
-        Num.FOUR = new Image();
-        Num.FOUR.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(30, 50);
-        _ctx.moveTo(30, 50);
-        _ctx.lineTo(70, 50);
-        _ctx.moveTo(70, 50);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(70, 75);
-        _ctx.lineTo(30, 75);
-        _ctx.stroke();
-        Num.FIVE = new Image();
-        Num.FIVE.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(30, 75);
-        _ctx.moveTo(30, 75);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(70, 75);
-        _ctx.lineTo(70, 50);
-        _ctx.moveTo(70, 50);
-        _ctx.lineTo(30, 50);
-        _ctx.stroke();
-        Num.SIX = new Image();
-        Num.SIX.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(35, 25);
-        _ctx.lineTo(65, 25);
-        _ctx.moveTo(65, 25);
-        _ctx.lineTo(50, 75);
-        _ctx.stroke();
-        Num.SEVEN = new Image();
-        Num.SEVEN.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(30, 75);
-        _ctx.moveTo(70, 25);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(30, 75);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(30, 50);
-        _ctx.lineTo(70, 50);
-        _ctx.stroke();
-        Num.EIGHT = new Image();
-        Num.EIGHT.src = _c.toDataURL();
-
-        _ctx.fillRect(0, 0, 100, 100);
-        _ctx.beginPath();
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(70, 25);
-        _ctx.moveTo(30, 25);
-        _ctx.lineTo(30, 50);
-        _ctx.moveTo(70, 25);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(30, 75);
-        _ctx.lineTo(70, 75);
-        _ctx.moveTo(30, 50);
-        _ctx.lineTo(70, 50);
-        _ctx.stroke();
-        Num.NINE = new Image();
-        Num.NINE.src = _c.toDataURL();
-
-        tile = Num.BLANK;
-      };
-
-      this.hasData = function() {
-        return tile !== Num.BLANK;
-      }
-
-      this.flip = function(num) {        
-        switch(num) {
-          case 1:
-            tile = Num.ONE;
-            break;
-          case 2:
-            tile = Num.TWO;
-            break;
-          case 3:
-            tile = Num.THREE;
-            break;
-          case 4:
-            tile = Num.FOUR;
-            break;
-          case 5:
-            tile = Num.FIVE;
-            break;
-          case 6:
-            tile = Num.SIX;
-            break;
-          case 7:
-            tile = Num.SEVEN;
-            break;
-          case 8:
-            tile = Num.EIGHT;
-            break;
-          case 9:
-            tile = Num.NINE;
-            break;
-        }
-      }
-
-      this.update = function() {
-        if (anim > 0) {
-          anim -= 0.02;
+          tile = Num.BLANK;
         };
-      }
 
-      this.draw = function(ctx) {
-        ctx.drawImage(tile, x, y);
+        this.hasData = function() {
+          return tile !== Num.BLANK;
+        }
+
+        this.flip = function(num) {        
+          switch(num) {
+            case 1:
+              tile = Num.ONE;
+              break;
+            case 2:
+              tile = Num.TWO;
+              break;
+            case 3:
+              tile = Num.THREE;
+              break;
+            case 4:
+              tile = Num.FOUR;
+              break;
+            case 5:
+              tile = Num.FIVE;
+              break;
+            case 6:
+              tile = Num.SIX;
+              break;
+            case 7:
+              tile = Num.SEVEN;
+              break;
+            case 8:
+              tile = Num.EIGHT;
+              break;
+            case 9:
+              tile = Num.NINE;
+              break;
+          }
+        }
+
+        this.update = function() {
+          if (anim > 0) {
+            anim -= 0.02;
+          };
+        }
+
+        this.draw = function(ctx) {
+          ctx.drawImage(tile, x, y);
+        }
       }
-    }
-  </script>
-</head>
+    </script>
+    </div>
+  </body>
 </html>
