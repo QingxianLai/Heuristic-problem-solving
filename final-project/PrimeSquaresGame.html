@@ -294,6 +294,8 @@
       }
 
       function startGame() {
+        init();
+        tick();
         playerOneName = document.getElementsByName("Player One Name")[0].value;
         if (!document.getElementById("radio1").checked) {
           multiple = true;
@@ -320,13 +322,12 @@
       }
 
       function init() {
-        if (data == null) {
-          data = [];
-          for (var i = 0; i < 9; i++) {
-            var x = (i % 3) * 120 + 20;
-            var y = Math.floor(i / 3) * 120 + 20;
-            data.push(new Num(x, y));
-          }
+        totalNumbers = 0;
+        data = [];
+        for (var i = 0; i < 9; i++) {
+          var x = (i % 3) * 120 + 20;
+          var y = Math.floor(i / 3) * 120 + 20;
+          data.push(new Num(x, y));
         }
       }
 
