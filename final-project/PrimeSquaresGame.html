@@ -295,10 +295,6 @@
 
       function startGame() {
         playerOneName = document.getElementsByName("Player One Name")[0].value;
-        document.getElementById('p1').innerHTML = "PlayerOne: " + playerOneName;
-        document.getElementById('score1').innerHTML = "Score: 0";
-        document.getElementById('p2').innerHTML = "PlayerTwo: " + playerTwoName;
-        document.getElementById('score2').innerHTML = "Score: 0";
         if (!document.getElementById("radio1").checked) {
           multiple = true;
           playerTwoName = document.getElementsByName("Player Two Name")[0].value;
@@ -317,6 +313,10 @@
               totalNumbers += 1;
           }  
         }
+        document.getElementById('p1').innerHTML = "PlayerOne: " + playerOneName;
+        document.getElementById('score1').innerHTML = "Score: 0";
+        document.getElementById('p2').innerHTML = "PlayerTwo: " + playerTwoName;
+        document.getElementById('score2').innerHTML = "Score: 0";
       }
 
       function init() {
