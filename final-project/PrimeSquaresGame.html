@@ -262,6 +262,7 @@
       var anim = 0;
       var single = false;
       var multiple = false;
+      var gameStarted = false;
       var map = {};
       var computerIsplayerOne = false;
       var playerOneScore = 0;
@@ -294,6 +295,7 @@
       }
 
       function startGame() {
+        gameStarted = true;
         init();
         tick();
         playerOneName = document.getElementsByName("Player One Name")[0].value;
@@ -488,7 +490,7 @@
             var num = prom(idx);
             console.log(isNaN(num));
             //openwin();
-            if (!isNaN(num)) {
+            if (!isNaN(num) && gameStarted) {
               data[idx].flip(num);
               map[idx] = num;
 
