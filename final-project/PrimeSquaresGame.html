@@ -485,55 +485,58 @@
           var idx = Math.floor(px / 120) + Math.floor(py / 120) * 3;
           if (!data[idx].hasData()) {
             var num = prom(idx);
-            //console.log(num);
+            console.log(isNaN(num));
             //openwin();
-            data[idx].flip(num);
-            map[idx] = num;
+            if (!isNaN(num)) {
+              data[idx].flip(num);
+              map[idx] = num;
 
-            var count = getPrimeCount(idx);
-            
-            if (totalNumbers == 8) {
-              playerOneTurn = false;
-              playerTwoTurn = true;
-            }
-            if (playerOneTurn) {
-              playerOneScore += count;
-              playerOneTurn = false;
-              playerTwoTurn = true;
-              document.getElementById('score1').innerHTML = "Score: " + playerOneScore;
-            } else {
-              playerTwoScore += count;
-              playerOneTurn = true;
-              playerTwoTurn = false;
-              document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
-            }
-            if (totalNumbers == 8) {
-              gameOver();
-            }
-            totalNumbers += 1;
-            if (single && totalNumbers == 8 && computerIsplayerOne) {
-              playerTwoTurn = false;
-            }
-            if (single && playerTwoTurn) {
-              var move = ai(computerIsplayerOne);
-              map[move[1][0]] = move[1][1];
-              data[move[1][0]].flip(move[1][1]);
-              playerOneTurn = true;
-              playerTwoTurn = false;
-              totalNumbers += 1;
-              var count = getPrimeCount(move[1][0]);
-              playerTwoScore += count;
-              document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
+              var count = getPrimeCount(idx);
+              
               if (totalNumbers == 8) {
+                playerOneTurn = false;
+                playerTwoTurn = true;
+              }
+              if (playerOneTurn) {
+                playerOneScore += count;
+                playerOneTurn = false;
+                playerTwoTurn = true;
+                document.getElementById('score1').innerHTML = "Score: " + playerOneScore;
+              } else {
+                playerTwoScore += count;
+                playerOneTurn = true;
+                playerTwoTurn = false;
+                document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
+              }
+              if (totalNumbers == 8) {
+                gameOver();
+              }
+              totalNumbers += 1;
+              if (single && totalNumbers == 8 && computerIsplayerOne) {
+                playerTwoTurn = false;
+              }
+              if (single && playerTwoTurn) {
                 var move = ai(computerIsplayerOne);
                 map[move[1][0]] = move[1][1];
                 data[move[1][0]].flip(move[1][1]);
+                playerOneTurn = true;
+                playerTwoTurn = false;
+                totalNumbers += 1;
                 var count = getPrimeCount(move[1][0]);
                 playerTwoScore += count;
                 document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
-                gameOver();
+                if (totalNumbers == 8) {
+                  var move = ai(computerIsplayerOne);
+                  map[move[1][0]] = move[1][1];
+                  data[move[1][0]].flip(move[1][1]);
+                  var count = getPrimeCount(move[1][0]);
+                  playerTwoScore += count;
+                  document.getElementById('score2').innerHTML = "Score: " + playerTwoScore;
+                  gameOver();
+                }
               }
             }
+              
             
           }
         }
@@ -554,11 +557,14 @@
         var num = parseInt(prompt("input number", ""));
         if (isNaN(num)) {
           alert("Please input correct number");
-        }
-        if (idx != 4 && num == 0) {
+        } else if (idx != 4 && num == 0) {
           alert("You cannot input 0 here");
+        } else if (num < 0 || num > 9) {
+          alert("You cannot input number which is greater than 9 or less than 0 here");
+        } else {
+          return num;  
         }
-        return num;
+        
       }
 
       function yesnoCheck() {
