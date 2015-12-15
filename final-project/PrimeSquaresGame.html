@@ -118,7 +118,7 @@
     </div>
 
     <div class="PostScore">
-      <input type="button" id="score" onclick="postScore('vsm')" type="button" style="display:none" value="Save Score"/>
+      <input type="button" id="score" onclick="postScore()" type="button" style="display:none" value="Save Score"/>
     </div>
 
     <style type="text/css">
@@ -408,7 +408,7 @@
         render();
       }
       
-      function postScore(ws, wr) {
+      function postScore() {
         if (single && playerOneScore > playerTwoScore) {
           ws = playerOneScore;
         }
