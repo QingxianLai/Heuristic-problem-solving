@@ -24,6 +24,9 @@
     </div>
 
     <div id="gameArea" style="position:absolute;top:30%; height:60%; width:90%">
+      <canvas id="canvas" width="380" height="380">
+        
+      </canvas>
       <style>
       canvas {
         border: 1px solid #FFFFFF;
@@ -296,10 +299,9 @@
         937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
 
       window.onload = function main() {
-        canvas = document.createElement("canvas");
-        canvas.height = canvas.width = 120 * 3 + 20;
+        canvas = document.getElementById("canvas");
         ctx = canvas.getContext("2d");
-        document.body.appendChild(canvas);
+        
 
         canvas.addEventListener("mousedown", mouseDown);
 
@@ -510,10 +512,14 @@
 
       function mouseDown(evt) {
         var el = evt.target;
-        var px = evt.clientX - el.offsetLeft;
-        var py = evt.clientY - el.offsetTop;
-        if (px % 120 >= 20 && py % 120 >= 20) {
+        console.log(el);
+        var px = evt.clientX - el.offsetLeft - 80;
+        var py = evt.clientY - el.offsetTop - 230;
+        console.log(px);
+        console.log(py);
+        if (px % 120 >= 0 && py % 120 >= 0) {
           var idx = Math.floor(px / 120) + Math.floor(py / 120) * 3;
+          console.log(idx);
           if (!data[idx].hasData()) {
             var num = prom(idx);
             console.log(isNaN(num));
