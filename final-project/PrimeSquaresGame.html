@@ -114,6 +114,19 @@
       </form>
     </div>
 
+    <div class="PostScore">
+      <button id="score" onclick="postScore('vsm')" type="button" style="display:none">Save Score</button>
+    </div>
+
+    <style type="text/css">
+    .PostScore{
+      position: absolute;
+        top: 425px;
+        left: 4.5%;
+        margin-left:-250px; 
+    }
+    </style>
+
     <style type="text/css">
       .Names{
         position: absolute;
@@ -337,7 +350,22 @@
         window.requestAnimationFrame(tick);
         render();
       }
-
+      
+      function postScore(ws, wr) {
+        if (single && playerOneScore > playerTwoScore) {
+          ws = playerOneScore;
+        }
+        if (multiple) {
+          if (playerOneScore > playerTwoScore) {
+            ws = playerOneScore;
+          } else if (playerOneScore < playerTwoScore) {
+            ws = playerTwoScore;
+          }
+        }
+        if (!wr)  wr = "guest";
+        if (wr == "") wr = "guest";
+        document.location.href="/drecco/index.php?task=PrimeSquares&winner="+wr+"&ws="+ws;
+      }
 
       function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -546,6 +574,7 @@
       }
 
       function gameOver() {
+        document.getElementById('score').style.display = 'block';
         if (playerOneScore > playerTwoScore) {
           alert(playerOneName + " wins!");
         } else if (playerOneScore < playerTwoScore) {
@@ -553,6 +582,7 @@
         } else {
           alert("Ties!");
         }
+        
       }
 
       function prom(idx) {  
