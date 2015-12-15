@@ -118,16 +118,58 @@
     </div>
 
     <div class="PostScore">
-      <button id="score" onclick="postScore('vsm')" type="button" style="display:none">Save Score</button>
+      <input type="button" id="score" onclick="postScore('vsm')" type="button" style="display:none" value="Save Score"/>
     </div>
 
     <style type="text/css">
     .PostScore{
       position: absolute;
-        top: 425px;
-        left: 4.5%;
-        margin-left:-250px; 
+        top: 10%;
+        bottom: 50%;
+        left: 65%;
+        right: 15%;
     }
+    .PostScore input[type="button"]
+      {
+          box-sizing: border-box;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          width: 100%;
+          padding: 3%;
+          background: #43D1AF;
+          border-bottom: 2px solid #30C29E;
+          border-top-style: none;
+          border-right-style: none;
+          border-left-style: none;    
+          color: #fff;
+      }
+    </style>
+
+    <div class="PrimeList">
+      <input type="button" id="primeList" onclick="getPrimeList()" type="button" value="Get Prime List"/>
+    </div>
+    <style type="text/css">
+    .PrimeList{
+      position: absolute;
+        top: 3%;
+        bottom: 50%;
+        left: 65%;
+        right: 15%;
+    }
+    .PrimeList input[type="button"]
+      {
+          box-sizing: border-box;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          width: 100%;
+          padding: 3%;
+          background: #43D1AF;
+          border-bottom: 2px solid #30C29E;
+          border-top-style: none;
+          border-right-style: none;
+          border-left-style: none;    
+          color: #fff;
+      }
     </style>
 
     <style type="text/css">
@@ -310,6 +352,7 @@
       }
 
       function startGame() {
+        document.getElementById('score').style.display = 'none';
         gameStarted = true;
         init();
         tick();
@@ -367,6 +410,20 @@
         if (!wr)  wr = "guest";
         if (wr == "") wr = "guest";
         document.location.href="/drecco/index.php?task=PrimeSquares&winner="+wr+"&ws="+ws;
+      }
+
+      function getPrimeList() {
+        var msg = "101 103"+ 
+" 107 109 113 127 131 137 139 149 151 157 163 167 173 179 181 191 193 197 199 211"+
+" 223 227 229 233 239 241 251 257 263 269 271 277 281 283 293 307 311 313 317 331"+ 
+" 337 347 349 353 359 367 373 379 383 389 397 401 409 419 421 431 433 439 443 449"+ 
+" 457 461 463 467 479 487 491 499 503 509 521 523 541 547 557 563 569 571 577 587"+ 
+" 593 599 601 607 613 617 619 631 641 643 647 653 659 661 673 677 683 691 701 709"+
+" 719 727 733 739 743 751 757 761 769 773 787 797 809 811 821 823 827 829 839 853"+
+" 857 859 863 877 881 883 887 907 911 919 929 937 941 947 953 967 971 977 983 991"+ 
+" 997";
+        alert(msg);
+
       }
 
       function render() {
@@ -511,6 +568,7 @@
       }
 
       function mouseDown(evt) {
+        if (gameStarted) {
         var el = evt.target;
         console.log(el);
         var px = evt.clientX - el.offsetLeft - 80;
@@ -577,8 +635,9 @@
             
           }
         }
-      }
 
+        }
+      }
       function gameOver() {
         document.getElementById('score').style.display = 'block';
         if (playerOneScore > playerTwoScore) {
