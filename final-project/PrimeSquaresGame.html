@@ -351,9 +351,23 @@
         tick();
       }
 
+      function refresh() {
+        single = false;
+        multiple = false;
+        map = {};
+        computerIsplayerOne = false;
+        playerOneScore = 0;
+        playerTwoScore = 0;
+        playerOneName, playerTwoName = "AI";
+        totalNumbers = 0;
+        playerOneTurn = true;
+        playerTwoTurn = false;
+      }
+
       function startGame() {
         document.getElementById('score').style.display = 'none';
         gameStarted = true;
+        refresh();
         init();
         tick();
         playerOneName = document.getElementsByName("Player One Name")[0].value;
